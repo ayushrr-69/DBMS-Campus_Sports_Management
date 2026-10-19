@@ -182,3 +182,33 @@ test('assign awards supports knockout final and group standings, and permits res
   });
 });
 
+test('coordinator can add student to a team roster and remove them', async () => {
+  const agent = await login('coordinator');
+  const [candidates] = await pool.query(
+    'SELECT student_id FROM student WHERE student_id NOT IN (SELECT student_id FROM team_member WHERE team_id = 2) LIMIT 1'
+  );
+  assert.ok(candidates.length > 0, 'Should find at least one student not in team 2');
+  const studentId = candidates[0].student_id;
+
+  const token1 = await formToken(agent);
+  const addRes = await agent.post('/teams/2/members').type('form').send({
+    _csrf: token1,
+    student_id: studentId,
+    jersey_number: 44
+  });
+  assert.equal(addRes.status, 302);
+
+  const [added] = await pool.query('SELECT * FROM team_member WHERE team_id = 2 AND student_id = ?', [studentId]);
+  assert.equal(added.length, 1);
+  assert.equal(added[0].jersey_number, 44);
+
+  const token2 = await formToken(agent);
+  const remRes = await agent.post(`/teams/2/members/${studentId}/remove`).type('form').send({
+    _csrf: token2
+  });
+  assert.equal(remRes.status, 302);
+
+  const [removed] = await pool.query('SELECT * FROM team_member WHERE team_id = 2 AND student_id = ?', [studentId]);
+  assert.equal(removed.length, 0);
+});
+

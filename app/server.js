@@ -1942,7 +1942,7 @@ app.get('/teams/:id', async (request, response, next) => {
     const teamId = Number(request.params.id);
     if (!Number.isInteger(teamId) || teamId < 1) return response.status(404).send(renderPage(request, 'Team not found', '<p>No such team.</p>'));
     const [teams] = await pool.execute(
-      `SELECT t.team_id, t.name AS team_name, d.name AS department_name, s.full_name AS captain_name, s.roll_number AS captain_roll
+      `SELECT t.team_id, t.department_id, t.name AS team_name, d.name AS department_name, s.full_name AS captain_name, s.roll_number AS captain_roll
        FROM team t JOIN department d ON d.department_id = t.department_id
        LEFT JOIN student s ON s.student_id = t.captain_id
        WHERE t.team_id = ?`,
@@ -1950,16 +1950,169 @@ app.get('/teams/:id', async (request, response, next) => {
     );
     if (!teams[0]) return response.status(404).send(renderPage(request, 'Team not found', '<p>No such team.</p>'));
     const [members] = await pool.execute(
-      `SELECT s.full_name, s.roll_number, s.academic_year, tm.jersey_number
+      `SELECT s.student_id, s.full_name, s.roll_number, s.academic_year, tm.jersey_number
        FROM team_member tm JOIN student s ON s.student_id = tm.student_id
        WHERE tm.team_id = ? ORDER BY tm.jersey_number IS NULL, tm.jersey_number, s.full_name`,
       [teamId]
     );
     const team = teams[0];
-    const memberRows = members.map((member) => `<tr><td><strong>${escapeHtml(member.full_name)}</strong></td><td>${escapeHtml(member.roll_number)}</td><td>${escapeHtml(member.academic_year)}</td><td>${member.jersey_number === null ? '—' : escapeHtml(member.jersey_number)}</td></tr>`).join('');
-    const body = `<section class="team-detail-hero"><div class="team-avatar team-avatar-large">${escapeHtml(team.team_name.slice(0, 2).toUpperCase())}</div><div><p class="eyebrow">${escapeHtml(team.department_name)}</p><h2>${escapeHtml(team.team_name)}</h2><p class="muted">${members.length} registered member${members.length === 1 ? '' : 's'}</p></div></section><section class="team-detail-summary"><div><span>Captain</span><strong>${escapeHtml(team.captain_name || 'Not assigned')}</strong>${team.captain_roll ? `<small>${escapeHtml(team.captain_roll)}</small>` : ''}</div><div><span>Department</span><strong>${escapeHtml(team.department_name)}</strong></div></section><section class="card"><div class="section-heading"><div><p class="eyebrow">Team roster</p><h2>Members</h2><p class="muted">Players registered for this team.</p></div></div><div class="table-scroll"><table><thead><tr><th>Player</th><th>Roll number</th><th>Year</th><th>Jersey</th></tr></thead><tbody>${memberRows || '<tr><td colspan="4">No members registered yet.</td></tr>'}</tbody></table></div></section><p><a class="button button-secondary" href="/teams">← Back to teams</a></p>`;
-    response.send(renderPage(request, team.team_name, body, { subtitle: 'View the complete team roster and captain details.' }));
+    const canEdit = request.session.user && (request.session.user.role === 'admin' || request.session.user.role === 'coordinator');
+
+    const memberRows = members.map((member) => {
+      const removeBtn = canEdit ? `
+        <td style="text-align: right;">
+          <form method="post" action="/teams/${teamId}/members/${member.student_id}/remove" style="display:inline;" onsubmit="return confirm('Remove ${escapeHtml(member.full_name)} from squad?');">
+            ${csrfField(request)}
+            <button type="submit" class="button button-secondary" style="color: #dc2626; border-color: #fecaca; padding: 2px 8px; font-size: 0.8rem; min-height: unset;">Remove</button>
+          </form>
+        </td>` : '';
+      return `<tr><td><strong>${escapeHtml(member.full_name)}</strong></td><td>${escapeHtml(member.roll_number)}</td><td>${escapeHtml(member.academic_year)}</td><td>${member.jersey_number === null ? '—' : escapeHtml(member.jersey_number)}</td>${removeBtn}</tr>`;
+    }).join('');
+
+    let addMemberSection = '';
+    if (canEdit) {
+      const [availableStudents] = await pool.execute(
+        `SELECT s.student_id, s.full_name, s.roll_number, d.name AS department_name, s.academic_year
+         FROM student s
+         JOIN department d ON d.department_id = s.department_id
+         WHERE s.student_id NOT IN (
+           SELECT tm.student_id FROM team_member tm WHERE tm.team_id = ?
+         )
+         ORDER BY (s.department_id = ?) DESC, d.name, s.full_name`,
+        [teamId, team.department_id]
+      );
+
+      const studentOptions = availableStudents.map((s) => {
+        const isDept = s.department_name === team.department_name;
+        const tag = isDept ? '★ Home Dept' : s.department_name;
+        return `<option value="${s.student_id}">${escapeHtml(s.full_name)} (${escapeHtml(s.roll_number)} · ${escapeHtml(tag)} · Year ${s.academic_year})</option>`;
+      }).join('');
+
+      addMemberSection = `
+        <section class="card" style="margin-top: var(--space-4);">
+          <div class="section-heading">
+            <div>
+              <p class="eyebrow">Squad roster management</p>
+              <h2>Add student to team</h2>
+              <p class="muted">Add an eligible student to this squad roster and assign their jersey number (0–99).</p>
+            </div>
+            <span class="status-pill status-scheduled-pill">${availableStudents.length} Available</span>
+          </div>
+          ${availableStudents.length === 0 ? '<p class="muted">All existing students are already enrolled in this squad.</p>' : `
+            <form method="post" action="/teams/${teamId}/members" class="form-grid">
+              ${csrfField(request)}
+              <div class="form-group" style="grid-column: span 2;">
+                <label for="student_id">Select student to add</label>
+                <select name="student_id" id="student_id" required>
+                  <option value="">— Choose student —</option>
+                  ${studentOptions}
+                </select>
+              </div>
+              <div class="form-group">
+                <label for="jersey_number">Jersey number <small class="muted">(Optional, 0–99)</small></label>
+                <input type="number" name="jersey_number" id="jersey_number" min="0" max="99" placeholder="e.g. 10">
+              </div>
+              <div class="form-group" style="display: flex; align-items: flex-end;">
+                <button type="submit" class="button button-primary">Add to squad roster</button>
+              </div>
+            </form>
+          `}
+        </section>
+      `;
+    }
+
+    const body = `
+      <section class="team-detail-hero">
+        <div class="team-avatar team-avatar-large">${escapeHtml(team.team_name.slice(0, 2).toUpperCase())}</div>
+        <div>
+          <p class="eyebrow">${escapeHtml(team.department_name)}</p>
+          <h2>${escapeHtml(team.team_name)}</h2>
+          <p class="muted">${members.length} registered member${members.length === 1 ? '' : 's'}</p>
+        </div>
+      </section>
+      <section class="team-detail-summary">
+        <div>
+          <span>Captain</span>
+          <strong>${escapeHtml(team.captain_name || 'Not assigned')}</strong>
+          ${team.captain_roll ? `<small>${escapeHtml(team.captain_roll)}</small>` : ''}
+        </div>
+        <div>
+          <span>Department</span>
+          <strong>${escapeHtml(team.department_name)}</strong>
+        </div>
+      </section>
+      <section class="card">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">Team roster</p>
+            <h2>Members</h2>
+            <p class="muted">Players currently registered for this team.</p>
+          </div>
+          <span class="relationship-pill">${members.length} Players</span>
+        </div>
+        <div class="table-scroll">
+          <table>
+            <thead>
+              <tr>
+                <th>Player</th>
+                <th>Roll number</th>
+                <th>Year</th>
+                <th>Jersey</th>
+                ${canEdit ? '<th style="text-align: right;">Action</th>' : ''}
+              </tr>
+            </thead>
+            <tbody>
+              ${memberRows || `<tr><td colspan="${canEdit ? 5 : 4}">No members registered yet.</td></tr>`}
+            </tbody>
+          </table>
+        </div>
+      </section>
+      ${addMemberSection}
+      <p style="margin-top: var(--space-4);"><a class="button button-secondary" href="/teams">← Back to teams</a></p>
+    `;
+    response.send(renderPage(request, team.team_name, body, { subtitle: 'View and manage team squad rosters and member jerseys.' }));
   } catch (error) { next(error); }
+});
+
+app.post('/teams/:id/members', requireRole('coordinator', 'admin'), async (request, response, next) => {
+  try {
+    const teamId = Number(request.params.id);
+    const studentId = Number(request.body.student_id);
+    const rawJersey = request.body.jersey_number !== undefined && request.body.jersey_number !== ''
+      ? Number(request.body.jersey_number)
+      : null;
+
+    if (!teamId || !studentId) {
+      throw { errno: 1644, sqlMessage: 'Please select a valid student to add to the team.' };
+    }
+    if (rawJersey !== null && (!Number.isInteger(rawJersey) || rawJersey < 0 || rawJersey > 99)) {
+      throw { errno: 1644, sqlMessage: 'Jersey number must be an integer between 0 and 99.' };
+    }
+
+    await pool.execute(
+      `INSERT INTO team_member (team_id, student_id, jersey_number)
+       VALUES (?, ?, ?)`,
+      [teamId, studentId, rawJersey]
+    );
+
+    response.redirect(`/teams/${teamId}`);
+  } catch (error) {
+    response.status(400).send(renderPage(request, 'Squad update rejected', `<p>${escapeHtml(humanDatabaseError(error))}</p><p><a class="button button-secondary" href="/teams/${request.params.id}">← Back to team</a></p>`));
+  }
+});
+
+app.post('/teams/:id/members/:studentId/remove', requireRole('coordinator', 'admin'), async (request, response, next) => {
+  try {
+    const teamId = Number(request.params.id);
+    const studentId = Number(request.params.studentId);
+    await pool.execute(
+      `DELETE FROM team_member WHERE team_id = ? AND student_id = ?`,
+      [teamId, studentId]
+    );
+    response.redirect(`/teams/${teamId}`);
+  } catch (error) {
+    response.status(400).send(renderPage(request, 'Squad update rejected', `<p>${escapeHtml(humanDatabaseError(error))}</p><p><a class="button button-secondary" href="/teams/${request.params.id}">← Back to team</a></p>`));
+  }
 });
 
 app.get('/design', (request, response) => {
