@@ -985,6 +985,7 @@ function csrfToken(request) {
 function renderFormToken(request) {
   return `<input type="hidden" name="_csrf" value="${escapeHtml(csrfToken(request))}">`;
 }
+const csrfField = renderFormToken;
 
 function statusBadge(status) {
   const label = String(status || 'scheduled');
@@ -1962,7 +1963,7 @@ app.get('/teams/:id', async (request, response, next) => {
       const removeBtn = canEdit ? `
         <td style="text-align: right;">
           <form method="post" action="/teams/${teamId}/members/${member.student_id}/remove" style="display:inline;" onsubmit="return confirm('Remove ${escapeHtml(member.full_name)} from squad?');">
-            ${csrfField(request)}
+            ${renderFormToken(request)}
             <button type="submit" class="button button-secondary" style="color: #dc2626; border-color: #fecaca; padding: 2px 8px; font-size: 0.8rem; min-height: unset;">Remove</button>
           </form>
         </td>` : '';
@@ -2000,7 +2001,7 @@ app.get('/teams/:id', async (request, response, next) => {
           </div>
           ${availableStudents.length === 0 ? '<p class="muted">All existing students are already enrolled in this squad.</p>' : `
             <form method="post" action="/teams/${teamId}/members" class="form-grid">
-              ${csrfField(request)}
+              ${renderFormToken(request)}
               <div class="form-group" style="grid-column: span 2;">
                 <label for="student_id">Select student to add</label>
                 <select name="student_id" id="student_id" required>
