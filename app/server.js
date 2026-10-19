@@ -1976,36 +1976,35 @@ app.get('/teams/:id', async (request, response, next) => {
         `SELECT s.student_id, s.full_name, s.roll_number, d.name AS department_name, s.academic_year
          FROM student s
          JOIN department d ON d.department_id = s.department_id
-         WHERE s.student_id NOT IN (
-           SELECT tm.student_id FROM team_member tm WHERE tm.team_id = ?
-         )
-         ORDER BY (s.department_id = ?) DESC, d.name, s.full_name`,
-        [teamId, team.department_id]
+         WHERE s.department_id = ?
+           AND s.student_id NOT IN (
+             SELECT tm.student_id FROM team_member tm WHERE tm.team_id = ?
+           )
+         ORDER BY s.academic_year, s.full_name`,
+        [team.department_id, teamId]
       );
 
       const studentOptions = availableStudents.map((s) => {
-        const isDept = s.department_name === team.department_name;
-        const tag = isDept ? '★ Home Dept' : s.department_name;
-        return `<option value="${s.student_id}">${escapeHtml(s.full_name)} (${escapeHtml(s.roll_number)} · ${escapeHtml(tag)} · Year ${s.academic_year})</option>`;
+        return `<option value="${s.student_id}">${escapeHtml(s.full_name)} (${escapeHtml(s.roll_number)} · Year ${s.academic_year})</option>`;
       }).join('');
 
       addMemberSection = `
         <section class="card" style="margin-top: var(--space-4);">
           <div class="section-heading">
             <div>
-              <p class="eyebrow">Squad roster management</p>
-              <h2>Add student to team</h2>
-              <p class="muted">Add an eligible student to this squad roster and assign their jersey number (0–99).</p>
+              <p class="eyebrow">Department roster rule</p>
+              <h2>Add student to ${escapeHtml(team.team_name)}</h2>
+              <p class="muted">Per tournament rules, only students enrolled in <strong>${escapeHtml(team.department_name)}</strong> can join this squad.</p>
             </div>
-            <span class="status-pill status-scheduled-pill">${availableStudents.length} Available</span>
+            <span class="status-pill status-scheduled-pill">${availableStudents.length} Eligible in ${escapeHtml(team.department_name)}</span>
           </div>
-          ${availableStudents.length === 0 ? '<p class="muted">All existing students are already enrolled in this squad.</p>' : `
+          ${availableStudents.length === 0 ? `<p class="muted">All existing students from ${escapeHtml(team.department_name)} are already enrolled in this squad.</p>` : `
             <form method="post" action="/teams/${teamId}/members" class="form-grid">
               ${renderFormToken(request)}
               <div class="form-group" style="grid-column: span 2;">
-                <label for="student_id">Select student to add</label>
+                <label for="student_id">Select ${escapeHtml(team.department_name)} student to add</label>
                 <select name="student_id" id="student_id" required>
-                  <option value="">— Choose student —</option>
+                  <option value="">— Choose ${escapeHtml(team.department_name)} student —</option>
                   ${studentOptions}
                 </select>
               </div>
@@ -2088,6 +2087,29 @@ app.post('/teams/:id/members', requireRole('coordinator', 'admin'), async (reque
     }
     if (rawJersey !== null && (!Number.isInteger(rawJersey) || rawJersey < 0 || rawJersey > 99)) {
       throw { errno: 1644, sqlMessage: 'Jersey number must be an integer between 0 and 99.' };
+    }
+
+    // Verify department alignment: student must belong to the team's department
+    const [checkRows] = await pool.execute(
+      `SELECT s.full_name AS student_name, sd.name AS student_dept_name, s.department_id AS student_dept_id,
+              t.name AS team_name, td.name AS team_dept_name, t.department_id AS team_dept_id
+       FROM student s
+       JOIN department sd ON sd.department_id = s.department_id
+       CROSS JOIN team t
+       JOIN department td ON td.department_id = t.department_id
+       WHERE s.student_id = ? AND t.team_id = ?`,
+      [studentId, teamId]
+    );
+
+    const check = checkRows[0];
+    if (!check) {
+      throw { errno: 1644, sqlMessage: 'Selected student or team could not be found.' };
+    }
+    if (check.student_dept_id !== check.team_dept_id) {
+      throw {
+        errno: 1644,
+        sqlMessage: `Department rule violation: ${check.student_name} is in ${check.student_dept_name}. Only students from ${check.team_dept_name} can join ${check.team_name}.`
+      };
     }
 
     await pool.execute(
@@ -3474,8 +3496,8 @@ app.post('/admin/:resource/:id/delete', requireRole('admin'), async (request, re
 });
 
 app.use((error, request, response, _next) => {
-  console.error(`Request failed: ${error.code || error.name || 'unknown error'}`);
-  response.status(500).send(renderPage(request, 'Operation failed', '<p>The operation could not be completed. Check the server log for the error code.</p>'));
+  console.error('Request failed:', error.stack || error.message || error);
+  response.status(500).send(renderPage(request, 'Operation failed', `<p>${escapeHtml(error.message || 'The operation could not be completed. Check the server log for details.')}</p>`));
 });
 
 const port = Number(process.env.PORT || 3000);

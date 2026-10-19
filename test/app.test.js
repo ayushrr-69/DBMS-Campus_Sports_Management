@@ -182,33 +182,53 @@ test('assign awards supports knockout final and group standings, and permits res
   });
 });
 
-test('coordinator can add student to a team roster and remove them', async () => {
+test('coordinator can add student to a team roster and remove them, and cross-department addition is rejected', async () => {
   const agent = await login('coordinator');
-  const [candidates] = await pool.query(
-    'SELECT student_id FROM student WHERE student_id NOT IN (SELECT student_id FROM team_member WHERE team_id = 2) LIMIT 1'
-  );
-  assert.ok(candidates.length > 0, 'Should find at least one student not in team 2');
-  const studentId = candidates[0].student_id;
 
+  // Find a student in team 2's department (department 2) who is not yet in team 2
+  const [sameDeptCandidates] = await pool.query(
+    'SELECT student_id FROM student WHERE department_id = (SELECT department_id FROM team WHERE team_id = 2) AND student_id NOT IN (SELECT student_id FROM team_member WHERE team_id = 2) LIMIT 1'
+  );
+  assert.ok(sameDeptCandidates.length > 0, 'Should find at least one same-department student not in team 2');
+  const validStudentId = sameDeptCandidates[0].student_id;
+
+  // Find a student from a different department (e.g. CSE, department 1)
+  const [diffDeptCandidates] = await pool.query(
+    'SELECT student_id FROM student WHERE department_id <> (SELECT department_id FROM team WHERE team_id = 2) LIMIT 1'
+  );
+  assert.ok(diffDeptCandidates.length > 0, 'Should find at least one different-department student');
+  const invalidStudentId = diffDeptCandidates[0].student_id;
+
+  // 1. Cross-department attempt should be rejected with 400
+  const token0 = await formToken(agent);
+  const rejectRes = await agent.post('/teams/2/members').type('form').send({
+    _csrf: token0,
+    student_id: invalidStudentId,
+    jersey_number: 99
+  });
+  assert.equal(rejectRes.status, 400);
+
+  // 2. Same-department student should succeed
   const token1 = await formToken(agent);
   const addRes = await agent.post('/teams/2/members').type('form').send({
     _csrf: token1,
-    student_id: studentId,
+    student_id: validStudentId,
     jersey_number: 44
   });
   assert.equal(addRes.status, 302);
 
-  const [added] = await pool.query('SELECT * FROM team_member WHERE team_id = 2 AND student_id = ?', [studentId]);
+  const [added] = await pool.query('SELECT * FROM team_member WHERE team_id = 2 AND student_id = ?', [validStudentId]);
   assert.equal(added.length, 1);
   assert.equal(added[0].jersey_number, 44);
 
+  // 3. Remove student
   const token2 = await formToken(agent);
-  const remRes = await agent.post(`/teams/2/members/${studentId}/remove`).type('form').send({
+  const remRes = await agent.post(`/teams/2/members/${validStudentId}/remove`).type('form').send({
     _csrf: token2
   });
   assert.equal(remRes.status, 302);
 
-  const [removed] = await pool.query('SELECT * FROM team_member WHERE team_id = 2 AND student_id = ?', [studentId]);
+  const [removed] = await pool.query('SELECT * FROM team_member WHERE team_id = 2 AND student_id = ?', [validStudentId]);
   assert.equal(removed.length, 0);
 });
 
