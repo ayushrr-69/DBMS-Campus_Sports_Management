@@ -1,0 +1,852 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Campus Sports Tournament Management System</title>
+  <style>
+    @page {
+      size: A4 portrait;
+      margin: 18mm 16mm 18mm 16mm;
+    }
+    *, *::before, *::after {
+      box-sizing: border-box;
+    }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      font-size: 10pt;
+      line-height: 1.55;
+      color: #1e293b;
+      background: #ffffff;
+      margin: 0;
+      padding: 0;
+    }
+    h1, h2, h3, h4 {
+      color: #0f172a;
+      font-weight: 700;
+      line-height: 1.25;
+      page-break-after: avoid;
+    }
+    h1 {
+      font-size: 20pt;
+      border-bottom: 2.5px solid #2563eb;
+      padding-bottom: 6px;
+      margin-top: 0;
+      margin-bottom: 12px;
+      color: #1e3a8a;
+    }
+    h2 {
+      font-size: 14pt;
+      border-bottom: 1.5px solid #e2e8f0;
+      padding-bottom: 4px;
+      margin-top: 22px;
+      margin-bottom: 10px;
+      color: #1e40af;
+      page-break-after: avoid;
+    }
+    h3 {
+      font-size: 11.5pt;
+      margin-top: 16px;
+      margin-bottom: 6px;
+      color: #0f172a;
+      page-break-after: avoid;
+    }
+    h4 {
+      font-size: 10.5pt;
+      margin-top: 12px;
+      margin-bottom: 4px;
+      color: #334155;
+      page-break-after: avoid;
+    }
+    p {
+      margin-top: 0;
+      margin-bottom: 8px;
+    }
+    blockquote {
+      margin: 8px 0 12px 0;
+      padding: 8px 14px;
+      background: #eff6ff;
+      border-left: 4px solid #3b82f6;
+      border-radius: 0 6px 6px 0;
+      color: #1e40af;
+      font-size: 9.5pt;
+      page-break-inside: avoid;
+    }
+    blockquote p {
+      margin: 0;
+    }
+    ul, ol {
+      margin-top: 4px;
+      margin-bottom: 10px;
+      padding-left: 22px;
+    }
+    li {
+      margin-bottom: 3px;
+    }
+    code {
+      font-family: "Consolas", "Courier New", monospace;
+      font-size: 8.8pt;
+      background: #f1f5f9;
+      color: #0f172a;
+      padding: 1.5px 4.5px;
+      border-radius: 4px;
+      border: 1px solid #e2e8f0;
+    }
+    pre {
+      background: #0f172a;
+      color: #f8fafc;
+      padding: 10px 12px;
+      border-radius: 6px;
+      overflow-x: auto;
+      font-size: 8.5pt;
+      line-height: 1.45;
+      margin-top: 6px;
+      margin-bottom: 12px;
+      page-break-inside: avoid;
+    }
+    pre code {
+      background: transparent;
+      color: inherit;
+      padding: 0;
+      border: none;
+      font-size: inherit;
+    }
+    hr {
+      border: none;
+      border-top: 1px solid #cbd5e1;
+      margin: 18px 0;
+    }
+    .table-wrap {
+      margin: 10px 0 14px 0;
+      page-break-inside: avoid;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 8.8pt;
+    }
+    th, td {
+      border: 1px solid #cbd5e1;
+      padding: 6px 9px;
+      text-align: left;
+      vertical-align: top;
+    }
+    th {
+      background: #f8fafc;
+      color: #0f172a;
+      font-weight: 700;
+      border-bottom: 2px solid #94a3b8;
+    }
+    tr:nth-child(even) td {
+      background: #fcfdfe;
+    }
+    a {
+      color: #2563eb;
+      text-decoration: none;
+    }
+    .diagram-pre {
+      font-family: "Consolas", monospace;
+      font-size: 8pt;
+      line-height: 1.25;
+      background: #f8fafc;
+      color: #1e293b;
+      border: 1px solid #cbd5e1;
+      border-radius: 6px;
+      padding: 10px;
+    }
+  </style>
+</head>
+<body>
+<h1 id="campus-sports-tournament-management-system">Campus Sports Tournament Management System</h1>
+<h1 id="comprehensive-dbms-guide-sql-joins-aggregate-functions-ctes-relational-mechanics">Comprehensive DBMS Guide: SQL Joins, Aggregate Functions, CTEs &amp; Relational Mechanics</h1>
+<blockquote><p><strong>Document Type:</strong> College DBMS Lab Project Architectural &amp; Oral Defense Handout</p></blockquote>
+<blockquote><p><strong>Database Engine:</strong> MySQL 8.0 Community Edition (InnoDB, <code>utf8mb4</code>)</p></blockquote>
+<blockquote><p><strong>Artifact Produced:</strong> <code>docs/DBMS_QUERIES_AND_AGGREGATES.pdf</code> (Derived from this markdown specification)</p></blockquote>
+<blockquote><p><strong>Target Audience:</strong> DBMS Lab Instructors, Oral Defense Examiners, and Project Collaborators</p></blockquote>
+<hr>
+<h2 id="table-of-contents">Table of Contents</h2>
+<ol>
+<li><a href="#1-executive-overview--query-architecture">Executive Overview &amp; Query Architecture</a></li>
+<li><a href="#2-theoretical-foundations-of-relational-joins">Theoretical Foundations of Relational Joins</a></li>
+</ol>
+<ul>
+<li><a href="#21-relational-algebra-join-formalism">2.1 Relational Algebra Join Formalism</a></li>
+<li><a href="#22-mysql-80-join-execution-algorithms-nested-loop--hash-join">2.2 MySQL 8.0 Join Execution Algorithms (Nested Loop &amp; Hash Join)</a></li>
+<li><a href="#23-inner-join-vs-left-outer-join-the-zero-match-disappearance-principle">2.3 INNER JOIN vs LEFT OUTER JOIN: The "Zero-Match Disappearance" Principle</a></li>
+<li><a href="#24-dual-foreign-key-self-referencing-joins-home-vs-away-teams">2.4 Dual Foreign Key Self-Referencing Joins (Home vs Away Teams)</a></li>
+<li><a href="#25-exclusive-arc--polymorphic-joins-via-set-union">2.5 Exclusive-Arc / Polymorphic Joins via Set Union</a></li>
+</ul>
+<ol>
+<li><a href="#3-theoretical-foundations-of-sql-aggregates--grouping">Theoretical Foundations of SQL Aggregates &amp; Grouping</a></li>
+</ol>
+<ul>
+<li><a href="#31-the-relational-aggregation-operator-gamma">3.1 The Relational Aggregation Operator ($\gamma$)</a></li>
+<li><a href="#32-the-crucial-difference-count-vs-countcolumn_name">3.2 The Crucial Difference: <code>COUNT(*)</code> vs <code>COUNT(column_name)</code></a></li>
+<li><a href="#33-grouping-semantics--the-only_full_group_by-standard">3.3 Grouping Semantics &amp; The <code>ONLY_FULL_GROUP_BY</code> Standard</a></li>
+<li><a href="#34-filter-lifecycle-where-vs-having">3.4 Filter Lifecycle: <code>WHERE</code> vs <code>HAVING</code></a></li>
+<li><a href="#35-boolean-expression-aggregation-sumcondition">3.5 Boolean Expression Aggregation (<code>SUM(condition)</code>)</a></li>
+<li><a href="#36-type-safety-unsigned-integer-underflow--cast-as-signed">3.6 Type Safety: Unsigned Integer Underflow &amp; <code>CAST(... AS SIGNED)</code></a></li>
+<li><a href="#37-null-coalescing-with-coalesce">3.7 Null Coalescing with <code>COALESCE()</code></a></li>
+</ul>
+<ol>
+<li><a href="#4-advanced-relational-constructs-ctes--window-functions">Advanced Relational Constructs: CTEs &amp; Window Functions</a></li>
+</ol>
+<ul>
+<li><a href="#41-common-table-expressions-with--as">4.1 Common Table Expressions (<code>WITH ... AS</code>)</a></li>
+<li><a href="#42-window-functions-vs-standard-aggregation">4.2 Window Functions vs Standard Aggregation</a></li>
+<li><a href="#43-comparative-ranking-dense_rank-vs-rank-vs-row_number">4.3 Comparative Ranking: <code>DENSE_RANK()</code> vs <code>RANK()</code> vs <code>ROW_NUMBER()</code></a></li>
+</ul>
+<ol>
+<li><a href="#5-deep-dive-walkthrough-of-flagship-production-queries">Deep-Dive Walkthrough of Flagship Production Queries</a></li>
+</ol>
+<ul>
+<li><a href="#51-deep-dive-v_points_table-multi-cte-standings-engine">5.1 Deep Dive: <code>v_points_table</code> (Multi-CTE Standings Engine)</a></li>
+<li><a href="#52-deep-dive-v_medal_tally-polymorphic-exclusive-arc-rollup">5.2 Deep Dive: <code>v_medal_tally</code> (Polymorphic Exclusive-Arc Rollup)</a></li>
+<li><a href="#53-deep-dive-v_match_schedule-6-table-operations-schedule">5.3 Deep Dive: <code>v_match_schedule</code> (6-Table Operations Schedule)</a></li>
+<li><a href="#54-deep-dive-fn_team_points-deterministic-score-function">5.4 Deep Dive: <code>fn_team_points</code> (Deterministic Score Function)</a></li>
+<li><a href="#55-deep-dive-sp_generate_group_fixtures--sp_advance_knockout">5.5 Deep Dive: <code>sp_generate_group_fixtures</code> &amp; <code>sp_advance_knockout</code></a></li>
+</ul>
+<ol>
+<li><a href="#6-complete-master-query-catalog-across-the-project">Complete Master Query Catalog Across the Project</a></li>
+</ol>
+<ul>
+<li><a href="#61-database-views-sqlviewssql">6.1 Database Views (<code>sql/views.sql</code>)</a></li>
+<li><a href="#62-stored-routines-sqlproceduressql">6.2 Stored Routines (<code>sql/procedures.sql</code>)</a></li>
+<li><a href="#63-named-demonstration-queries-sqlqueriessql">6.3 Named Demonstration Queries (<code>sql/queries.sql</code>)</a></li>
+<li><a href="#64-integrity-triggers-sqltriggerssql">6.4 Integrity Triggers (<code>sql/triggers.sql</code>)</a></li>
+<li><a href="#65-nodejs-application-layer-queries-appserverjs">6.5 Node.js Application Layer Queries (<code>app/server.js</code>)</a></li>
+</ul>
+<ol>
+<li><a href="#7-dbms-lab-viva-defense--oral-examination-cheat-sheet">DBMS Lab Viva Defense &amp; Oral Examination Cheat-Sheet</a></li>
+</ol>
+<hr>
+<h1 id="1-executive-overview-query-architecture">1. Executive Overview &amp; Query Architecture</h1>
+<p>In relational database management systems, data is normalized into discrete, decoupled tables to eliminate redundancy, avoid update anomalies, and enforce Boyce-Codd Normal Form (BCNF). However, real-world business questions—such as <em>"Which department has the most medals?"</em>, <em>"What are the current football group standings?"</em>, or <em>"Who is scheduled to play on Main Turf at 10:00 AM?"</em>—require assembling records from multiple relations and computing mathematical summaries.</p>
+<p>Our <strong>Campus Sports Tournament Management System</strong> deliberately implements this computation <strong>inside the database engine</strong> rather than the client application.</p>
+<pre><code class="language-">+-----------------------------------------------------------------------------------+
+|                            DATABASE QUERY ARCHITECTURE                            |
++-----------------------------------------------------------------------------------+
+|                                                                                   |
+|  [ BASE TABLES (18 BCNF RELATIONS) ]                                              |
+|  department, student, sport, tournament, venue, sport_venue, event, stage,        |
+|  eligibility_rule, registration, team, team_member, match, match_event,           |
+|  individual_result, official, award, app_user                                     |
+|         │                                                                         |
+|         ▼                                                                         |
+|  [ RELATIONAL COMBINATIONS &amp; JOINS ]                                              |
+|  • INNER JOIN (Equi-joins along FK paths: event ↔ sport ↔ tournament)            |
+|  • LEFT OUTER JOIN (Preserves zero-match teams, unassigned officials)            |
+|  • DUAL ROLE JOINS (match joins team as home_team AND away_team)                 |
+|  • POLYMORPHIC UNIONS (Resolves Exclusive ARCs: student vs team awards)           |
+|         │                                                                         |
+|         ▼                                                                         |
+|  [ AGGREGATIONS &amp; MATHEMATICAL REDUCTIONS ]                                       |
+|  • COUNT(expr), SUM(expr), AVG(expr), MIN(expr), MAX(expr)                        |
+|  • Boolean Pivot Sums: SUM(award_type = 'gold')                                   |
+|  • Signed Cast Arithmetic: CAST(goals_for AS SIGNED) - CAST(goals_against)       |
+|  • Null Safety: COALESCE(SUM(...), 0)                                             |
+|         │                                                                         |
+|         ▼                                                                         |
+|  [ ADVANCED DBMS ENGINES ]                                                        |
+|  • Common Table Expressions (WITH stage_teams, team_results, aggregated)          |
+|  • Analytic Window Functions: DENSE_RANK() OVER (PARTITION BY event_id, stage_id) |
+|         │                                                                         |
+|         ▼                                                                         |
+|  [ PRESENTATION &amp; CLIENT CONSUMPTION ]                                            |
+|  • Materialized Views: v_points_table, v_medal_tally, v_match_schedule            |
+|  • Stored Routines: fn_team_points, sp_generate_group_fixtures, sp_advance        |
+|  • Express Web Application (Thin layer: executes SELECT * FROM &lt;view&gt;)            |
++-----------------------------------------------------------------------------------+</code></pre>
+<p>By pushing joins, aggregations, and windowing into MySQL:</p>
+<ol>
+<li><strong>Network traffic is minimized:</strong> Instead of transmitting hundreds of raw match records to Node.js and calculating points in JavaScript, MySQL returns the exact 4-row points table.</li>
+<li><strong>ACID transactions and concurrency are guaranteed:</strong> Database locks and snapshot isolation guarantee consistent reads without race conditions.</li>
+<li><strong>Application code remains thin and declarative:</strong> The Node.js application simply executes <code>SELECT * FROM v_points_table</code>.</li>
+</ol>
+<hr>
+<h1 id="2-theoretical-foundations-of-relational-joins">2. Theoretical Foundations of Relational Joins</h1>
+<h2 id="21-relational-algebra-join-formalism">2.1 Relational Algebra Join Formalism</h2>
+<p>In formal relational algebra, a join is a derived operation combining the Cartesian product ($\times$) of two relations with a selection ($\sigma$) based on a join condition:</p>
+<p>$$R \bowtie_\theta S = \sigma_\theta (R \times S)$$</p>
+<p>When the condition $\theta$ uses exclusively equality predicates between foreign keys and primary keys ($R.A = S.B$), the operation is an <strong>Equi-Join</strong>.</p>
+<p>In our database, every join links child foreign keys to parent primary keys. For example:</p>
+<ul>
+<li><code>event.sport_id = sport.sport_id</code></li>
+<li><code>match.venue_id = venue.venue_id</code></li>
+<li><code>registration.event_id = event.event_id</code></li>
+</ul>
+<h2 id="22-mysql-80-join-execution-algorithms">2.2 MySQL 8.0 Join Execution Algorithms</h2>
+<p>When MySQL 8.0 executes a query involving joins, the InnoDB storage engine and query optimizer employ specific execution strategies:</p>
+<ol>
+<li><strong>Index Nested-Loop Join (INLJ):</strong>  </li>
+</ol>
+<p>When the join predicate matches an index (such as a Primary Key or a Foreign Key index), MySQL iterates through the outer table and performs instant $O(\log N)$ B-tree lookups on the inner table. This is the primary algorithm used across our schema because all foreign keys are indexed.</p>
+<ol>
+<li><strong>Hash Join (MySQL 8.0.18+):</strong>  </li>
+</ol>
+<p>If no usable index exists for an equi-join, MySQL builds an in-memory hash table of the smaller relation on the join attribute, then scans the larger relation to find matches in $O(M + N)$ linear time.</p>
+<ol>
+<li><strong>Block Nested-Loop (BNL):</strong>  </li>
+</ol>
+<p>Used when no index exists and hash join is not applicable; loads chunks of the outer relation into the <code>join_buffer_size</code> cache to reduce disk reads.</p>
+<h2 id="23-inner-join-vs-left-outer-join-the-zero-match-disappearance-principle">2.3 INNER JOIN vs LEFT OUTER JOIN: The "Zero-Match Disappearance" Principle</h2>
+<p>The fundamental distinction between an <code>INNER JOIN</code> and a <code>LEFT OUTER JOIN</code> is row preservation:</p>
+<ul>
+<li><strong><code>INNER JOIN</code> ($R \bowtie S$):</strong> Emits a resulting tuple if and only if <strong>both</strong> relations satisfy the join condition. If an entity in $R$ has no matching child in $S$, that entity is <strong>discarded</strong>.</li>
+<li><strong><code>LEFT OUTER JOIN</code> ($R \mathbin{⟕} S$):</strong> Emits <strong>all</strong> tuples from the left relation $R$. If no matching tuple exists in $S$, the columns of $S$ are populated with <code>NULL</code>.</li>
+</ul>
+<h3 id="why-this-distinction-is-vital-in-our-project">Why This Distinction is Vital in Our Project</h3>
+<p>Consider generating the tournament points table:</p>
+<ul>
+<li>If we use an <code>INNER JOIN</code> between <code>team</code> and <code>match</code>, <strong>any team that has played zero matches will be completely eliminated from the standings!</strong></li>
+<li>In a tournament, when a group stage is created, all registered teams must immediately appear on the leaderboard with:</li>
+<li><code>Played = 0</code></li>
+<li><code>Won = 0</code></li>
+<li><code>Drawn = 0</code></li>
+<li><code>Lost = 0</code></li>
+<li><code>Points = 0</code></li>
+</ul>
+<p>To achieve this, <code>v_points_table</code> seeds the registered teams first, and then performs a <strong><code>LEFT JOIN</code></strong> onto completed match results. If matches have not taken place, the match columns are <code>NULL</code>, which we coalesce to <code>0</code>.</p>
+<h2 id="24-dual-foreign-key-self-referencing-joins-home-vs-away-teams">2.4 Dual Foreign Key Self-Referencing Joins (Home vs Away Teams)</h2>
+<p>A single table can reference another table multiple times for distinct semantic roles. In <code>match</code>:</p>
+<ul>
+<li><code>home_team_id</code> references <code>team.team_id</code></li>
+<li><code>away_team_id</code> references <code>team.team_id</code></li>
+</ul>
+<p>To retrieve the readable names of both opposing teams in a single SQL query, the query must join the <code>team</code> table <strong>twice</strong>, using unique table aliases:</p>
+<pre><code class="language-sql">SELECT 
+    m.match_id,
+    home.name AS home_team,
+    away.name AS away_team
+FROM `match` AS m
+JOIN team AS home ON home.team_id = m.home_team_id
+JOIN team AS away ON away.team_id = m.away_team_id;</code></pre>
+<h3 id="relational-execution-mechanics">Relational Execution Mechanics:</h3>
+<ol>
+<li>The engine scans <code>match</code>.</li>
+<li>For each match tuple, it evaluates <code>home.team_id = m.home_team_id</code> against the B-tree index of <code>team</code> to extract the home team name.</li>
+<li>In parallel, it evaluates <code>away.team_id = m.away_team_id</code> against the same index to extract the away team name.</li>
+<li>The database check constraint <code>ck_match_distinct_teams (home_team_id &lt;&gt; away_team_id)</code> guarantees that <code>home</code> and <code>away</code> can never represent the same department team in a match.</li>
+</ol>
+<h2 id="25-exclusive-arc-polymorphic-joins-via-set-union">2.5 Exclusive-Arc / Polymorphic Joins via Set Union</h2>
+<p>In sports management, some events are played by <strong>teams</strong> (e.g. Football, Basketball), while other events are contested by <strong>individual athletes</strong> (e.g. Athletics 100m Sprint).</p>
+<p>The <code>award</code> table enforces an Exclusive ARC constraint:</p>
+<pre><code class="language-sql">CONSTRAINT ck_award_exactly_one_recipient 
+CHECK ((student_id IS NOT NULL) &lt;&gt; (team_id IS NOT NULL))</code></pre>
+<p>Every award is given to <strong>either</strong> a team <strong>or</strong> an individual student, never both.</p>
+<p>To calculate the overall <strong>Department Medal Tally</strong>, the database must map every award back to its sponsoring department:</p>
+<ul>
+<li>Team awards: <code>award</code> $\rightarrow$ <code>team</code> $\rightarrow$ <code>department</code></li>
+<li>Student awards: <code>award</code> $\rightarrow$ <code>student</code> $\rightarrow$ <code>department</code></li>
+</ul>
+<p>We resolve this polymorphic relationship inside <code>v_medal_tally</code> using a <strong>Common Table Expression (CTE)</strong> combined with <strong><code>UNION ALL</code></strong>:</p>
+<pre><code class="language-sql">WITH award_departments AS (
+    -- Path 1: Team awards
+    SELECT d.department_id, d.name AS department_name, a.award_type
+    FROM award AS a
+    JOIN team AS t ON t.team_id = a.team_id
+    JOIN department AS d ON d.department_id = t.department_id
+
+    UNION ALL
+
+    -- Path 2: Individual student awards
+    SELECT d.department_id, d.name AS department_name, a.award_type
+    FROM award AS a
+    JOIN student AS s ON s.student_id = a.student_id
+    JOIN department AS d ON d.department_id = s.department_id
+)</code></pre>
+<p><code>UNION ALL</code> concatenates the tuple streams from both relational paths without the costly de-duplication overhead of <code>UNION</code>, creating a unified relation ready for aggregation.</p>
+<hr>
+<h1 id="3-theoretical-foundations-of-sql-aggregates-grouping">3. Theoretical Foundations of SQL Aggregates &amp; Grouping</h1>
+<h2 id="31-the-relational-aggregation-operator-gamma">3.1 The Relational Aggregation Operator ($\gamma$)</h2>
+<p>In formal relational algebra, aggregation is denoted by the calligraphic gamma operator:</p>
+<p>$$\gamma_{G, F_1(A_1), F_2(A_2), \dots, F_n(A_n)} (R)$$</p>
+<p>Where:</p>
+<ul>
+<li>$G$ is the list of grouping attributes (<code>GROUP BY</code>).</li>
+<li>$F_i$ is an aggregate function (<code>COUNT</code>, <code>SUM</code>, <code>AVG</code>, <code>MIN</code>, <code>MAX</code>).</li>
+<li>$A_i$ is the attribute being aggregated.</li>
+</ul>
+<p>Aggregation partitions the input relation $R$ into subsets of tuples having identical values for attributes $G$, and reduces each partition to a single summary tuple.</p>
+<h2 id="32-the-crucial-difference-count-vs-countcolumn_name">3.2 The Crucial Difference: <code>COUNT(*)</code> vs <code>COUNT(column_name)</code></h2>
+<p>A frequent trap in DBMS design is assuming <code>COUNT(*)</code> and <code>COUNT(column)</code> behave identically. <strong>They do not:</strong></p>
+<div class="table-wrap"><table><tr><th><code>COUNT(*)</code></th><th>Counts the total number of <strong>rows</strong> in the partition.</th><th>Counts the row even if all joined columns are <code>NULL</code>.</th></tr><tr><td><code>COUNT(expression)</code></td><td>Evaluates <code>expression</code> for each row in the partition.</td><td><strong>Ignores and skips <code>NULL</code> values.</strong></td></tr></table></div>
+<h3 id="practical-example-in-our-database">Practical Example in Our Database:</h3>
+<p>In <code>v_points_table</code>, we compute matches played:</p>
+<pre><code class="language-sql">COUNT(tr.team_id) AS played</code></pre>
+<ul>
+<li>If a team has played zero matches, the <code>LEFT JOIN</code> produces a row where <code>tr.team_id IS NULL</code>.</li>
+<li>If we had used <code>COUNT(*)</code>, MySQL would count the row itself and report <strong>1 match played</strong> for an inactive team!</li>
+<li>Because we used <code>COUNT(tr.team_id)</code>, MySQL encounters <code>NULL</code>, ignores it, and correctly returns <strong>0 matches played</strong>!</li>
+</ul>
+<p>Similarly, in Query <code>Q04</code> (Squad Sizes):</p>
+<pre><code class="language-sql">SELECT t.team_id, t.name, COUNT(tm.student_id) AS squad_size
+FROM team AS t
+LEFT JOIN team_member AS tm ON tm.team_id = t.team_id
+GROUP BY t.team_id, t.name;</code></pre>
+<p>If a team has no registered members yet, <code>COUNT(tm.student_id)</code> returns <code>0</code>. <code>COUNT(*)</code> would have falsely returned <code>1</code>.</p>
+<h2 id="33-grouping-semantics-the-only_full_group_by-standard">3.3 Grouping Semantics &amp; The <code>ONLY_FULL_GROUP_BY</code> Standard</h2>
+<p>MySQL 8.0 strictly enforces the SQL-92 / SQL:1999 standard <code>ONLY_FULL_GROUP_BY</code>.</p>
+<p>Under this rule, any column appearing in the <code>SELECT</code> list that is <strong>not</strong> enclosed in an aggregate function <strong>must be explicitly present in the <code>GROUP BY</code> clause</strong>, unless the column is functionally dependent on the primary key in the <code>GROUP BY</code>.</p>
+<p>For example, in Query <code>Q05</code>:</p>
+<pre><code class="language-sql">SELECT d.name, COUNT(s.student_id) AS student_count
+FROM department AS d
+JOIN student AS s ON s.department_id = d.department_id
+GROUP BY d.department_id, d.name
+HAVING COUNT(s.student_id) &gt;= 5;</code></pre>
+<p>Both <code>d.department_id</code> and <code>d.name</code> are included in the <code>GROUP BY</code> to ensure deterministic projection.</p>
+<h2 id="34-filter-lifecycle-where-vs-having">3.4 Filter Lifecycle: <code>WHERE</code> vs <code>HAVING</code></h2>
+<p>Understanding the query execution lifecycle is essential for DBMS viva defense:</p>
+<pre><code class="language-">[1. FROM &amp; JOIN]  --&gt; Assembles base Cartesian product &amp; join conditions
+        │
+        ▼
+[2. WHERE]        --&gt; Row-by-row filter on BASE tuples BEFORE grouping
+        │
+        ▼
+[3. GROUP BY]     --&gt; Partitions remaining rows into aggregation buckets
+        │
+        ▼
+[4. AGGREGATES]   --&gt; Computes COUNT(), SUM(), AVG(), etc. per bucket
+        │
+        ▼
+[5. HAVING]       --&gt; Bucket-by-bucket filter on COMPUTED AGGREGATES
+        │
+        ▼
+[6. WINDOW]       --&gt; Computes analytic functions (DENSE_RANK(), ROW_NUMBER())
+        │
+        ▼
+[7. SELECT]       --&gt; Projects columns, evaluates expressions &amp; aliases
+        │
+        ▼
+[8. ORDER BY]     --&gt; Sorts the final output stream
+        │
+        ▼
+[9. LIMIT/OFFSET] --&gt; Truncates the emitted result set</code></pre>
+<ul>
+<li><strong><code>WHERE</code> executes in Step 2:</strong> It cannot reference aggregate functions like <code>COUNT(*)</code> because grouping has not occurred yet.</li>
+<li><strong><code>HAVING</code> executes in Step 5:</strong> It filters the summarized buckets generated by <code>GROUP BY</code>.</li>
+</ul>
+<p>In Query <code>Q05</code>, we filter departments with at least 5 registered students:</p>
+<ul>
+<li><code>WHERE</code> filters out inactive students if needed.</li>
+<li><code>HAVING COUNT(s.student_id) &gt;= 5</code> filters out departments whose total student bucket is smaller than 5.</li>
+</ul>
+<h2 id="35-boolean-expression-aggregation-sumcondition">3.5 Boolean Expression Aggregation (<code>SUM(condition)</code>)</h2>
+<p>In MySQL, boolean comparisons evaluate to <code>1</code> (True), <code>0</code> (False), or <code>NULL</code> (Unknown). We leverage this mathematical property to build high-performance pivot rollups without subqueries or procedural cursors.</p>
+<p>In <code>v_medal_tally</code>:</p>
+<pre><code class="language-sql">SELECT
+    department_id,
+    department_name,
+    SUM(award_type = 'gold') AS gold,
+    SUM(award_type = 'silver') AS silver,
+    SUM(award_type = 'bronze') AS bronze,
+    COUNT(*) AS total_awards
+FROM award_departments
+GROUP BY department_id, department_name;</code></pre>
+<h3 id="execution-mechanics">Execution Mechanics:</h3>
+<p>For each row in a department's award bucket:</p>
+<ul>
+<li>If <code>award_type</code> is <code>'gold'</code>, <code>(award_type = 'gold')</code> evaluates to <code>1</code>.</li>
+<li>If <code>award_type</code> is <code>'silver'</code>, it evaluates to <code>0</code>.</li>
+<li>Summing these integer representations yields the exact gold medal count in a single sequential pass over the data!</li>
+</ul>
+<h2 id="36-type-safety-unsigned-integer-underflow-cast-as-signed">3.6 Type Safety: Unsigned Integer Underflow &amp; <code>CAST(... AS SIGNED)</code></h2>
+<p>In our physical database schema (<code>sql/schema.sql</code>), match scores are stored as:</p>
+<pre><code class="language-sql">home_score SMALLINT UNSIGNED NOT NULL DEFAULT 0,
+away_score SMALLINT UNSIGNED NOT NULL DEFAULT 0</code></pre>
+<p>Under MySQL's default <code>NO_UNSIGNED_SUBTRACTION</code> SQL mode, subtracting two unsigned integers when the subtrahend exceeds the minuend (e.g., $1 - 3$) does <strong>not</strong> produce $-2$; it triggers a fatal runtime error:</p>
+<p><code>BIGINT UNSIGNED value is out of range</code>.</p>
+<p>To calculate goal difference (<code>goals_for - goals_against</code>) safely, we explicitly cast both attributes to signed integers before subtraction:</p>
+<pre><code class="language-sql">COALESCE(SUM(
+    CAST(tr.goals_for AS SIGNED) - CAST(tr.goals_against AS SIGNED)
+), 0) AS goal_difference</code></pre>
+<p>This ensures that teams with negative goal differences (e.g. $-4$) are represented accurately without integer underflow exceptions.</p>
+<h2 id="37-null-coalescing-with-coalesce">3.7 Null Coalescing with <code>COALESCE()</code></h2>
+<p>The ANSI SQL <code>COALESCE(val1, val2, ..., valN)</code> function returns the first non-<code>NULL</code> argument in its parameter list.</p>
+<p>When a team has zero completed matches, the <code>LEFT JOIN</code> yields <code>NULL</code> for <code>SUM(tr.points)</code>. Presenting <code>NULL</code> to end users or application code can cause <code>NaN</code> display errors or broken table layouts.</p>
+<p>Wrapping all aggregate sums in <code>COALESCE(SUM(...), 0)</code> guarantees that every team has a valid, non-null numeric score:</p>
+<ul>
+<li>Points: <code>0</code></li>
+<li>Goal Difference: <code>0</code></li>
+<li>Won / Drawn / Lost: <code>0</code></li>
+</ul>
+<hr>
+<h1 id="4-advanced-relational-constructs-ctes-window-functions">4. Advanced Relational Constructs: CTEs &amp; Window Functions</h1>
+<h2 id="41-common-table-expressions-with-as">4.1 Common Table Expressions (<code>WITH ... AS</code>)</h2>
+<p>A Common Table Expression (CTE) defines a named, temporary result set that exists only within the scope of a single SQL statement.</p>
+<h3 id="advantages-of-ctes-over-nested-subqueries">Advantages of CTEs over Nested Subqueries:</h3>
+<ol>
+<li><strong>Readability and Modularity:</strong> Decomposes complex multi-stage transformations into top-down, self-documenting computational steps.</li>
+<li><strong>Reusability:</strong> A CTE can be referenced multiple times within the same downstream query without duplicating SQL code.</li>
+<li><strong>Optimizer Efficiency:</strong> MySQL 8.0 can choose to either merge the CTE definition directly into the parent query plan or materialize it into an internal temporary table.</li>
+</ol>
+<p>Our <code>v_points_table</code> view links three sequential CTEs:</p>
+<ol>
+<li><code>stage_teams</code>: Extracts all registered teams belonging to the stage.</li>
+<li><code>team_results</code>: Expands each match into two symmetrical perspectives (home and away).</li>
+<li><code>aggregated</code>: Joins the first two CTEs and computes mathematical totals.</li>
+</ol>
+<h2 id="42-window-functions-vs-standard-aggregation">4.2 Window Functions vs Standard Aggregation</h2>
+<p>Standard <code>GROUP BY</code> collapses multiple input rows into a single summary row. In contrast, <strong>Window Functions</strong> perform calculations across a set of table rows that are related to the current row, <strong>while retaining the individual identity of each row in the output</strong>.</p>
+<p>The general syntax is:</p>
+<p>$$\text{function}() \text{ OVER } (\text{PARTITION BY } col_1, \dots \text{ ORDER BY } col_2 \dots)$$</p>
+<ul>
+<li><strong><code>PARTITION BY</code></strong>: Divides the query result set into independent processing partitions (similar to <code>GROUP BY</code>, but without collapsing rows).</li>
+<li><strong><code>ORDER BY</code></strong>: Defines the logical sequence of rows within each partition for ranking or running totals.</li>
+</ul>
+<h2 id="43-comparative-ranking-dense_rank-vs-rank-vs-row_number">4.3 Comparative Ranking: <code>DENSE_RANK()</code> vs <code>RANK()</code> vs <code>ROW_NUMBER()</code></h2>
+<div class="table-wrap"><table><tr><th>Function</th><th>Handling of Ties (Equal Order Values)</th><th>Sequence Gap Behavior</th><th>Example Output for Points (9, 7, 7, 4)</th></tr><tr><td><code>ROW_NUMBER()</code></td><td>Assigns arbitrary sequential integers; breaks ties arbitrarily.</td><td>No gaps (1, 2, 3, 4, ...)</td><td>1, 2, 3, 4</td></tr><tr><td><code>RANK()</code></td><td>Gives identical rank to tied rows.</td><td><strong>Leaves gaps</strong> corresponding to the number of tied rows.</td><td>1, <strong>2, 2, 4</strong> (Rank 3 is skipped!)</td></tr><tr><td><code>DENSE_RANK()</code></td><td>Gives identical rank to tied rows.</td><td><strong>Never leaves gaps</strong>; consecutive integers are always used.</td><td>1, <strong>2, 2, 3</strong> (Rank 3 is preserved!)</td></tr></table></div>
+<h3 id="why-we-chose-dense_rank-for-tournament-standings">Why We Chose <code>DENSE_RANK()</code> for Tournament Standings:</h3>
+<p>In a sports tournament, if two teams are tied for 2nd place, the next team in line should be ranked 3rd (not 4th). <code>DENSE_RANK()</code> guarantees consecutive podium positions across all groups:</p>
+<pre><code class="language-sql">DENSE_RANK() OVER (
+    PARTITION BY aggregated.event_id, aggregated.stage_id
+    ORDER BY points DESC, goal_difference DESC, goals_for DESC, team_id
+) AS points_position</code></pre>
+<p>Notice the tie-breaker hierarchy:</p>
+<ol>
+<li>Primary sort: <code>points DESC</code> (most points wins)</li>
+<li>Secondary sort: <code>goal_difference DESC</code> (better goal difference wins)</li>
+<li>Tertiary sort: <code>goals_for DESC</code> (more goals scored wins)</li>
+<li>Deterministic tie-breaker: <code>team_id ASC</code> (guarantees a stable, deterministic ordering)</li>
+</ol>
+<hr>
+<h1 id="5-deep-dive-walkthrough-of-flagship-production-queries">5. Deep-Dive Walkthrough of Flagship Production Queries</h1>
+<h2 id="51-deep-dive-v_points_table-multi-cte-standings-engine">5.1 Deep Dive: <code>v_points_table</code> (Multi-CTE Standings Engine)</h2>
+<p>Located at: <a href="file:///c:/Users/Asus/OneDrive/Desktop/DBMS%20proj/sql/views.sql#L10-L111"><code>sql/views.sql:10-111</code></a></p>
+<pre><code class="language-sql">CREATE VIEW v_points_table AS
+WITH stage_teams AS (
+    -- Step 1: Identify all teams competing in this group stage.
+    -- We union home teams from matches, away teams from matches,
+    -- and registered teams for un-scheduled groups.
+    SELECT DISTINCT s.event_id, s.stage_id, s.name AS group_name, m.home_team_id AS team_id
+    FROM stage s
+    JOIN `match` m ON m.stage_id = s.stage_id
+    WHERE s.stage_type = 'group'
+    UNION
+    SELECT DISTINCT s.event_id, s.stage_id, s.name AS group_name, m.away_team_id AS team_id
+    FROM stage s
+    JOIN `match` m ON m.stage_id = s.stage_id
+    WHERE s.stage_type = 'group'
+    UNION
+    SELECT DISTINCT s.event_id, s.stage_id, s.name AS group_name, r.team_id
+    FROM stage s
+    JOIN registration r ON r.event_id = s.event_id
+    WHERE s.stage_type = 'group'
+      AND r.team_id IS NOT NULL
+      AND r.status = 'approved'
+      AND NOT EXISTS (SELECT 1 FROM `match` m WHERE m.stage_id = s.stage_id)
+),
+team_results AS (
+    -- Step 2: Unpivot match records so each match contributes two rows:
+    -- one from the home team perspective and one from the away team perspective.
+    SELECT
+        s.event_id,
+        m.stage_id,
+        m.home_team_id AS team_id,
+        m.home_score AS goals_for,
+        m.away_score AS goals_against,
+        CASE
+            WHEN m.home_score &gt; m.away_score THEN 3
+            WHEN m.home_score = m.away_score THEN 1
+            ELSE 0
+        END AS points,
+        CASE WHEN m.home_score &gt; m.away_score THEN 1 ELSE 0 END AS wins,
+        CASE WHEN m.home_score = m.away_score THEN 1 ELSE 0 END AS draws,
+        CASE WHEN m.home_score &lt; m.away_score THEN 1 ELSE 0 END AS losses
+    FROM `match` AS m
+    JOIN stage AS s ON s.stage_id = m.stage_id
+    WHERE s.stage_type = 'group' AND m.status = 'completed'
+    UNION ALL
+    SELECT
+        s.event_id,
+        m.stage_id,
+        m.away_team_id AS team_id,
+        m.away_score AS goals_for,
+        m.home_score AS goals_against,
+        CASE
+            WHEN m.away_score &gt; m.home_score THEN 3
+            WHEN m.away_score = m.home_score THEN 1
+            ELSE 0
+        END AS points,
+        CASE WHEN m.away_score &gt; m.home_score THEN 1 ELSE 0 END AS wins,
+        CASE WHEN m.away_score = m.home_score THEN 1 ELSE 0 END AS draws,
+        CASE WHEN m.away_score &lt; m.home_score THEN 1 ELSE 0 END AS losses
+    FROM `match` AS m
+    JOIN stage AS s ON s.stage_id = m.stage_id
+    WHERE s.stage_type = 'group' AND m.status = 'completed'
+),
+aggregated AS (
+    -- Step 3: Outer-join registered teams with match results and compute summaries.
+    SELECT
+        st.event_id,
+        st.stage_id,
+        st.group_name,
+        st.team_id,
+        COUNT(tr.team_id) AS played,
+        COALESCE(SUM(tr.wins), 0) AS won,
+        COALESCE(SUM(tr.draws), 0) AS drawn,
+        COALESCE(SUM(tr.losses), 0) AS lost,
+        COALESCE(SUM(tr.goals_for), 0) AS goals_for,
+        COALESCE(SUM(tr.goals_against), 0) AS goals_against,
+        COALESCE(SUM(
+            CAST(tr.goals_for AS SIGNED) - CAST(tr.goals_against AS SIGNED)
+        ), 0) AS goal_difference,
+        COALESCE(SUM(tr.points), 0) AS points
+    FROM stage_teams st
+    LEFT JOIN team_results tr
+      ON tr.stage_id = st.stage_id AND tr.team_id = st.team_id
+    GROUP BY st.event_id, st.stage_id, st.group_name, st.team_id
+)
+-- Step 4: Final join with descriptive parent tables and window ranking.
+SELECT
+    aggregated.event_id,
+    aggregated.stage_id,
+    aggregated.group_name,
+    e.name AS event_name,
+    sp.name AS sport_name,
+    aggregated.team_id,
+    team.name AS team_name,
+    aggregated.played,
+    aggregated.won,
+    aggregated.drawn,
+    aggregated.lost,
+    aggregated.goals_for,
+    aggregated.goals_against,
+    aggregated.goal_difference,
+    aggregated.points,
+    DENSE_RANK() OVER (
+        PARTITION BY aggregated.event_id, aggregated.stage_id
+        ORDER BY points DESC, goal_difference DESC, goals_for DESC, team_id
+    ) AS points_position
+FROM aggregated
+JOIN team ON team.team_id = aggregated.team_id
+JOIN `event` AS e ON e.event_id = aggregated.event_id
+JOIN sport AS sp ON sp.sport_id = e.sport_id;</code></pre>
+<h3 id="visual-transformation-flowchart">Visual Transformation Flowchart:</h3>
+<pre><code class="language-">[ match table ] ──────────────┐
+  (home &amp; away scores)        │
+                              ▼
+                      [ CTE: team_results ] (Unpivoted: 2 rows per match)
+                              │
+[ stage &amp; registration ] ─────┼──────────────────────┐
+  (all valid teams)           ▼                      ▼
+                      [ CTE: stage_teams ]    [ LEFT OUTER JOIN ]
+                                                     │
+                                                     ▼
+                                            [ CTE: aggregated ]
+                                            • COUNT(tr.team_id)
+                                            • COALESCE(SUM(...))
+                                            • CAST(... AS SIGNED)
+                                                     │
+                                                     ▼
+                                            [ DENSE_RANK() OVER ]
+                                            Partitioned by stage
+                                                     │
+                                                     ▼
+                                            [ Final View Output ]</code></pre>
+<hr>
+<h2 id="52-deep-dive-v_medal_tally-polymorphic-exclusive-arc-rollup">5.2 Deep Dive: <code>v_medal_tally</code> (Polymorphic Exclusive-Arc Rollup)</h2>
+<p>Located at: <a href="file:///c:/Users/Asus/OneDrive/Desktop/DBMS%20proj/sql/views.sql#L113-L140"><code>sql/views.sql:113-140</code></a></p>
+<pre><code class="language-sql">CREATE VIEW v_medal_tally AS
+WITH award_departments AS (
+    SELECT
+        d.department_id,
+        d.name AS department_name,
+        a.award_type
+    FROM award AS a
+    JOIN team AS t ON t.team_id = a.team_id
+    JOIN department AS d ON d.department_id = t.department_id
+    UNION ALL
+    SELECT
+        d.department_id,
+        d.name AS department_name,
+        a.award_type
+    FROM award AS a
+    JOIN student AS s ON s.student_id = a.student_id
+    JOIN department AS d ON d.department_id = s.department_id
+)
+SELECT
+    department_id,
+    department_name,
+    SUM(award_type = 'gold') AS gold,
+    SUM(award_type = 'silver') AS silver,
+    SUM(award_type = 'bronze') AS bronze,
+    COUNT(*) AS total_awards
+FROM award_departments
+GROUP BY department_id, department_name;</code></pre>
+<h3 id="key-technical-mechanisms">Key Technical Mechanisms:</h3>
+<ol>
+<li><strong>Exclusive-Arc Normalization:</strong> Resolves the polymorphism between individual student awards and squad team awards into a unified virtual stream <code>award_departments</code>.</li>
+<li><strong>Boolean Expression Summing:</strong> Avoids three separate subqueries by using <code>SUM(award_type = 'gold')</code>. In MySQL, if <code>award_type</code> is <code>'gold'</code>, the comparison yields <code>1</code>, which <code>SUM()</code> aggregates.</li>
+<li><strong>Total Calculation:</strong> <code>COUNT(*)</code> counts total awards received by each department across all categories.</li>
+</ol>
+<hr>
+<h2 id="53-deep-dive-v_match_schedule-6-table-operations-schedule">5.3 Deep Dive: <code>v_match_schedule</code> (6-Table Operations Schedule)</h2>
+<p>Located at: <a href="file:///c:/Users/Asus/OneDrive/Desktop/DBMS%20proj/sql/views.sql#L141-L163"><code>sql/views.sql:141-163</code></a></p>
+<pre><code class="language-sql">CREATE VIEW v_match_schedule AS
+SELECT
+    m.match_id,
+    e.event_id,
+    e.name AS event_name,
+    s.name AS stage_name,
+    m.starts_at,
+    m.duration_minutes,
+    m.status,
+    home.name AS home_team,
+    away.name AS away_team,
+    v.name AS venue_name,
+    o.full_name AS official_name,
+    o.role AS official_role
+FROM `match` AS m
+JOIN stage AS s ON s.stage_id = m.stage_id
+JOIN `event` AS e ON e.event_id = s.event_id
+JOIN team AS home ON home.team_id = m.home_team_id
+JOIN team AS away ON away.team_id = m.away_team_id
+JOIN venue AS v ON v.venue_id = m.venue_id
+LEFT JOIN official AS o ON o.match_id = m.match_id
+WHERE m.status IN ('scheduled', 'live');</code></pre>
+<h3 id="relational-path-breakdown">Relational Path Breakdown:</h3>
+<ol>
+<li><code>match</code> $\rightarrow$ <code>stage</code>: Retrieves the tournament bracket stage name.</li>
+<li><code>stage</code> $\rightarrow$ <code>event</code>: Traverses to the parent sport event.</li>
+<li><code>match</code> $\rightarrow$ <code>team (home)</code>: Translates <code>m.home_team_id</code> into the department squad name.</li>
+<li><code>match</code> $\rightarrow$ <code>team (away)</code>: Translates <code>m.away_team_id</code> into the opposing department squad name.</li>
+<li><code>match</code> $\rightarrow$ <code>venue</code>: Identifies the physical ground, court, or track.</li>
+<li><code>match</code> $\rightarrow$ <code>official</code> via <strong><code>LEFT JOIN</code></strong>: An official may not yet be assigned to a scheduled match. An <code>INNER JOIN</code> would cause unassigned matches to vanish from the calendar. The <code>LEFT JOIN</code> preserves the fixture while showing <code>NULL</code> for the referee name.</li>
+</ol>
+<hr>
+<h2 id="54-deep-dive-fn_team_points-deterministic-score-function">5.4 Deep Dive: <code>fn_team_points</code> (Deterministic Score Function)</h2>
+<p>Located at: <a href="file:///c:/Users/Asus/OneDrive/Desktop/DBMS%20proj/sql/procedures.sql#L8-L34"><code>sql/procedures.sql:8-34</code></a></p>
+<pre><code class="language-sql">CREATE FUNCTION fn_team_points(
+    p_event_id INT UNSIGNED,
+    p_team_id INT UNSIGNED
+)
+RETURNS INT
+READS SQL DATA
+BEGIN
+    DECLARE v_points INT DEFAULT 0;
+
+    SELECT COALESCE(SUM(
+        CASE
+            WHEN (m.home_team_id = p_team_id AND m.home_score &gt; m.away_score)
+              OR (m.away_team_id = p_team_id AND m.away_score &gt; m.home_score)
+                THEN 3
+            WHEN m.home_score = m.away_score THEN 1
+            ELSE 0
+        END
+    ), 0)
+    INTO v_points
+    FROM `match` AS m
+    JOIN stage AS s ON s.stage_id = m.stage_id
+    WHERE s.event_id = p_event_id
+      AND m.status = 'completed'
+      AND (m.home_team_id = p_team_id OR m.away_team_id = p_team_id);
+
+    RETURN v_points;
+END$$</code></pre>
+<h3 id="mechanics">Mechanics:</h3>
+<ul>
+<li>Joins <code>match</code> with <code>stage</code> to filter by tournament event.</li>
+<li>Filters strictly on <code>m.status = 'completed'</code>.</li>
+<li>Uses a conditional <code>CASE</code> expression inside <code>SUM()</code>:</li>
+<li>3 points if the specified team was home and scored more, OR was away and scored more.</li>
+<li>1 point if the match was drawn.</li>
+<li>0 points for a defeat.</li>
+<li>Returns <code>0</code> via <code>COALESCE</code> if the team has played no completed matches.</li>
+</ul>
+<hr>
+<h2 id="55-deep-dive-sp_generate_group_fixtures-sp_advance_knockout">5.5 Deep Dive: <code>sp_generate_group_fixtures</code> &amp; <code>sp_advance_knockout</code></h2>
+<p>Located at: <a href="file:///c:/Users/Asus/OneDrive/Desktop/DBMS%20proj/sql/procedures.sql#L38-L176"><code>sql/procedures.sql:38-176</code></a></p>
+<h3 id="1-sp_generate_group_fixtures-window-ranking">1. <code>sp_generate_group_fixtures</code> Window Ranking:</h3>
+<pre><code class="language-sql">INSERT INTO fixture_teams (sequence_no, team_id)
+SELECT
+    ROW_NUMBER() OVER (ORDER BY r.team_id),
+    r.team_id
+FROM registration AS r
+JOIN stage AS s ON s.event_id = r.event_id
+WHERE s.stage_id = p_stage_id
+  AND r.team_id IS NOT NULL
+  AND r.status = 'approved'
+GROUP BY r.team_id;</code></pre>
+<p>Uses <code>ROW_NUMBER() OVER (ORDER BY r.team_id)</code> to assign sequential indices $1, 2, \dots, N$ to all approved teams, enabling a clean round-robin nested Cartesian loop:</p>
+<p>$$\forall i \in [1, N-1], \quad \forall j \in [i+1, N]: \quad \text{Schedule Match}(Team_i, Team_j)$$</p>
+<h3 id="2-sp_advance_knockout-window-partitioning">2. <code>sp_advance_knockout</code> Window Partitioning:</h3>
+<pre><code class="language-sql">INSERT INTO stage_winners (sequence_no, team_id)
+SELECT
+    ROW_NUMBER() OVER (ORDER BY group_name),
+    team_id
+FROM (
+    SELECT
+        group_name,
+        team_id,
+        ROW_NUMBER() OVER (
+            PARTITION BY group_name
+            ORDER BY points DESC, goal_difference DESC, goals_for DESC, team_id
+        ) AS group_position
+    FROM v_points_table
+    WHERE stage_id = p_source_stage_id
+) AS ranked_groups
+WHERE group_position = 1;</code></pre>
+<ul>
+<li>In the inner subquery, <code>ROW_NUMBER() OVER (PARTITION BY group_name ORDER BY ...)</code> assigns ranking positions inside each group independently.</li>
+<li>The outer query filters <code>WHERE group_position = 1</code> to harvest strictly the top seed from each group.</li>
+<li>The harvested winners are paired into knockout semi-final or final fixtures.</li>
+</ul>
+<hr>
+<h1 id="6-complete-master-query-catalog-across-the-project">6. Complete Master Query Catalog Across the Project</h1>
+<p>Below is the exhaustive catalog of every query in the repository that uses Joins, Aggregates, CTEs, or Window Functions.</p>
+<h2 id="61-database-views-sqlviewssql">6.1 Database Views (<code>sql/views.sql</code>)</h2>
+<div class="table-wrap"><table><tr><th>Object Name</th><th>Relational Operations Used</th><th>Joins Employed</th><th>Aggregates &amp; Window Functions</th><th>Primary Purpose</th></tr><tr><td><code>v_points_table</code></td><td>CTE (<code>WITH</code>), <code>UNION</code>, <code>UNION ALL</code>, <code>LEFT JOIN</code>, <code>INNER JOIN</code></td><td><code>stage</code> $\bowtie$ <code>match</code>, <code>registration</code> $\bowtie$ <code>stage</code>, <code>stage_teams</code> $\mathbin{⟕}$ <code>team_results</code>, <code>team</code>, <code>event</code>, <code>sport</code></td><td><code>COUNT(tr.team_id)</code>, <code>SUM(wins)</code>, <code>SUM(draws)</code>, <code>SUM(losses)</code>, <code>SUM(goals_for)</code>, <code>SUM(goals_against)</code>, <code>SUM(CAST.. - CAST..)</code>, <code>SUM(points)</code>, <code>DENSE_RANK() OVER (...)</code></td><td>Computes live round-robin standings, tie-breaking criteria, and consecutive positions per group.</td></tr><tr><td><code>v_medal_tally</code></td><td>CTE (<code>WITH</code>), <code>UNION ALL</code>, <code>INNER JOIN</code>, <code>GROUP BY</code></td><td><code>award</code> $\bowtie$ <code>team</code> $\bowtie$ <code>department</code>, <code>award</code> $\bowtie$ <code>student</code> $\bowtie$ <code>department</code></td><td><code>SUM(award_type = 'gold')</code>, <code>SUM(award_type = 'silver')</code>, <code>SUM(award_type = 'bronze')</code>, <code>COUNT(*)</code></td><td>Resolves Exclusive-Arc awards into a single department leaderboard.</td></tr><tr><td><code>v_match_schedule</code></td><td>Multi-table <code>INNER JOIN</code>, <code>LEFT JOIN</code>, <code>WHERE IN</code></td><td><code>match</code> $\bowtie$ <code>stage</code> $\bowtie$ <code>event</code> $\bowtie$ <code>team (home)</code> $\bowtie$ <code>team (away)</code> $\bowtie$ <code>venue</code> $\mathbin{⟕}$ <code>official</code></td><td>None (Projection over 6 tables)</td><td>Generates the operational tournament match schedule for live and upcoming fixtures.</td></tr></table></div>
+<hr>
+<h2 id="62-stored-routines-sqlproceduressql">6.2 Stored Routines (<code>sql/procedures.sql</code>)</h2>
+<div class="table-wrap"><table><tr><th>Routine Name</th><th>Routine Type</th><th>Joins Employed</th><th>Aggregates &amp; Window Functions</th><th>Primary Purpose</th></tr><tr><td><code>fn_team_points</code></td><td>Function</td><td><code>match</code> $\bowtie$ <code>stage</code></td><td><code>SUM(CASE WHEN ... THEN 3 ... END)</code>, <code>COALESCE(...)</code></td><td>Deterministically calculates cumulative league points for a specific team in an event.</td></tr><tr><td><code>sp_generate_group_fixtures</code></td><td>Procedure</td><td><code>stage</code> $\bowtie$ <code>event</code> $\bowtie$ <code>sport</code>, <code>registration</code> $\bowtie$ <code>stage</code></td><td><code>ROW_NUMBER() OVER (ORDER BY r.team_id)</code>, <code>COUNT(*) INTO v_count</code></td><td>Enumerates approved teams and inserts round-robin match pairings.</td></tr><tr><td><code>sp_advance_knockout</code></td><td>Procedure</td><td>Read from <code>v_points_table</code></td><td><code>ROW_NUMBER() OVER (PARTITION BY group_name ORDER BY ...)</code>, <code>ROW_NUMBER() OVER (ORDER BY group_name)</code></td><td>Identifies group winners and generates subsequent knockout bracket fixtures.</td></tr><tr><td><code>sp_assign_awards</code></td><td>Procedure</td><td>Subquery on <code>match</code></td><td><code>CASE WHEN home_score &gt; away_score ... END</code></td><td>Automatically awards gold and silver medals to final match competitors.</td></tr></table></div>
+<hr>
+<h2 id="63-named-demonstration-queries-sqlqueriessql">6.3 Named Demonstration Queries (<code>sql/queries.sql</code>)</h2>
+<div class="table-wrap"><table><tr><th>Query ID</th><th>Description</th><th>SQL Snippet Highlights</th><th>Joins Used</th><th>Aggregates / Analytical Constructs</th></tr><tr><td><strong>Q01</strong></td><td>List tournament events</td><td><code>SELECT e.name, s.name FROM event e JOIN sport s ON s.sport_id = e.sport_id</code></td><td><code>INNER JOIN</code> (<code>event</code>, <code>sport</code>)</td><td>None</td></tr><tr><td><strong>Q02</strong></td><td>Upcoming schedule</td><td><code>SELECT * FROM v_match_schedule ORDER BY starts_at</code></td><td>Encapsulated in view</td><td>View query</td></tr><tr><td><strong>Q03</strong></td><td>Students by department</td><td><code>SELECT s.full_name, d.name FROM student s JOIN department d ON d.department_id = s.department_id</code></td><td><code>INNER JOIN</code> (<code>student</code>, <code>department</code>)</td><td>None</td></tr><tr><td><strong>Q04</strong></td><td>Teams &amp; squad sizes</td><td><code>SELECT t.name, COUNT(tm.student_id) FROM team t LEFT JOIN team_member tm ... GROUP BY t.team_id, t.name</code></td><td><code>LEFT JOIN</code> (<code>team</code>, <code>team_member</code>)</td><td><code>COUNT(tm.student_id)</code>, <code>GROUP BY</code></td></tr><tr><td><strong>Q05</strong></td><td>Departments $\ge$ 5 students</td><td><code>SELECT d.name, COUNT(s.student_id) FROM department d JOIN student s ... GROUP BY d.department_id HAVING COUNT(*) &gt;= 5</code></td><td><code>INNER JOIN</code> (<code>department</code>, <code>student</code>)</td><td><code>COUNT(s.student_id)</code>, <code>GROUP BY</code>, <code>HAVING</code></td></tr><tr><td><strong>Q06</strong></td><td>Football registered teams</td><td><code>WHERE EXISTS (SELECT 1 FROM registration r JOIN event e ON e.event_id = r.event_id ...)</code></td><td>Correlated semi-join with <code>EXISTS</code></td><td>Semi-join predicate</td></tr><tr><td><strong>Q07</strong></td><td>Students not in athletics</td><td><code>WHERE NOT EXISTS (SELECT 1 FROM registration r JOIN sport sp ...)</code></td><td>Correlated anti-join with <code>NOT EXISTS</code></td><td>Anti-join predicate</td></tr><tr><td><strong>Q08</strong></td><td>Captains $\cup$ Athletes</td><td><code>SELECT ... FROM team JOIN student ... UNION SELECT ... FROM registration JOIN student</code></td><td><code>INNER JOIN</code> in both branches</td><td><code>UNION</code> (Set union with de-duplication)</td></tr><tr><td><strong>Q09</strong></td><td>Points table standings</td><td><code>SELECT * FROM v_points_table ORDER BY points_position</code></td><td>Encapsulated in view</td><td><code>DENSE_RANK() OVER (...)</code></td></tr><tr><td><strong>Q10</strong></td><td>High-scoring teams</td><td><code>SELECT team_name, points FROM v_points_table WHERE points &gt; 3</code></td><td>View filter</td><td>View filter</td></tr><tr><td><strong>Q11</strong></td><td>Department medal tally</td><td><code>SELECT * FROM v_medal_tally ORDER BY gold DESC, silver DESC</code></td><td>Encapsulated in view</td><td><code>SUM(award_type = 'gold')</code></td></tr><tr><td><strong>Q12</strong></td><td>Athletics heat results</td><td><code>SELECT e.name, s.full_name, ir.result_value FROM individual_result ir JOIN registration r ... JOIN student s ... JOIN event e</code></td><td>4-table <code>INNER JOIN</code> (<code>individual_result</code>, <code>registration</code>, <code>student</code>, <code>event</code>)</td><td>None</td></tr><tr><td><strong>Q14</strong></td><td>Match victory margins</td><td><code>SELECT ABS(CAST(home_score AS SIGNED) - CAST(away_score AS SIGNED)) AS margin FROM match JOIN team home ... JOIN team away</code></td><td>Dual <code>INNER JOIN</code> to <code>team</code></td><td><code>ABS(CAST(.. AS SIGNED) - CAST(.. AS SIGNED))</code></td></tr><tr><td><strong>Q15</strong></td><td>Goal scorers</td><td><code>SELECT DISTINCT s.full_name, d.name FROM match_event me JOIN student s ... JOIN department d WHERE event_type = 'goal'</code></td><td>3-table <code>INNER JOIN</code> (<code>match_event</code>, <code>student</code>, <code>department</code>)</td><td><code>DISTINCT</code></td></tr><tr><td><strong>Q16</strong></td><td>Routine score lookup</td><td><code>SELECT fn_team_points(1, 1)</code></td><td>Stored Function</td><td>Encapsulated conditional <code>SUM()</code></td></tr><tr><td><strong>Q17</strong></td><td>Match officials activity</td><td><code>SELECT o.full_name, COUNT(o.match_id) FROM official o GROUP BY o.official_id</code></td><td>Single table projection</td><td><code>COUNT(o.match_id)</code>, <code>GROUP BY</code></td></tr><tr><td><strong>Q18</strong></td><td>Registrations by status</td><td><code>SELECT e.name, r.status, COUNT(*) FROM registration r JOIN event e GROUP BY e.event_id, r.status</code></td><td><code>INNER JOIN</code> (<code>registration</code>, <code>event</code>)</td><td><code>COUNT(*)</code>, Multi-column <code>GROUP BY</code></td></tr></table></div>
+<hr>
+<h2 id="64-integrity-triggers-sqltriggerssql">6.4 Integrity Triggers (<code>sql/triggers.sql</code>)</h2>
+<div class="table-wrap"><table><tr><th><code>trg_check_eligibility_insert</code></th><th><code>BEFORE INSERT ON registration</code></th><th><code>event</code> $\mathbin{⟕}$ <code>eligibility_rule</code> $\bowtie$ <code>student</code></th><th>Verifies age, academic year, and gender constraints before registering an entrant.</th></tr><tr><td><code>trg_check_eligibility_update</code></td><td><code>BEFORE UPDATE ON registration</code></td><td><code>event</code> $\bowtie$ <code>student</code> $\mathbin{⟕}$ <code>eligibility_rule</code></td><td>Re-verifies gender eligibility if participant or event references change.</td></tr><tr><td><code>trg_venue_clash_insert</code></td><td><code>BEFORE INSERT ON match</code></td><td>Self-comparison with <code>match</code></td><td>Checks temporal interval intersection: <code>starts_at &lt; new_end AND end &gt; new_starts_at</code>.</td></tr><tr><td><code>trg_venue_clash_update</code></td><td><code>BEFORE UPDATE ON match</code></td><td>Self-comparison with <code>match</code></td><td>Guarantees rescheduled matches do not conflict with existing bookings.</td></tr><tr><td><code>trg_update_score</code></td><td><code>AFTER INSERT ON match_event</code></td><td>Scalar subquery on <code>match</code></td><td>Increments <code>home_score</code> or <code>away_score</code> when a <code>'goal'</code> event is logged.</td></tr></table></div>
+<hr>
+<h2 id="65-nodejs-application-layer-queries-appserverjs">6.5 Node.js Application Layer Queries (<code>app/server.js</code>)</h2>
+<div class="table-wrap"><table><tr><th><code>GET /events</code></th><th>Master Event Hub</th><th><code>event</code> $\bowtie$ <code>sport</code> $\bowtie$ <code>tournament</code></th><th>Scalar subqueries: <code>COUNT(DISTINCT stage_id)</code>, <code>COUNT(<em>) ... status = 'completed'</code>, <code>COUNT(</em>) ... status = 'live'</code>, <code>COUNT(*) ... status = 'scheduled'</code></th></tr><tr><td><code>GET /events/:id</code></td><td>Event Detail Page</td><td><code>stage</code> $\mathbin{⟕}$ <code>match</code>, <code>match</code> $\bowtie$ <code>stage</code> $\bowtie$ <code>home</code> $\bowtie$ <code>away</code> $\bowtie$ <code>venue</code>, <code>registration</code> $\bowtie$ <code>student</code> $\bowtie$ <code>department</code></td><td><code>COUNT(m.match_id)</code> with <code>GROUP BY st.stage_id, st.name</code></td></tr><tr><td><code>GET /points</code></td><td>Standings Page</td><td><code>event</code> $\bowtie$ <code>sport</code> $\bowtie$ <code>stage</code>, read from <code>v_points_table</code></td><td>Synchronizes empty group brackets with live calculated points standings</td></tr><tr><td><code>GET /coordinator</code></td><td>Match Operations Dashboard</td><td>5-table join: <code>match</code> $\bowtie$ <code>stage</code> $\bowtie$ <code>event</code> $\bowtie$ <code>sport</code> $\bowtie$ <code>home</code> $\bowtie$ <code>away</code></td><td>Subquery counts for completed and scheduled stages</td></tr><tr><td><code>POST /coordinator/advance</code></td><td>Knockout Progression</td><td>Invokes <code>CALL sp_advance_knockout(?, ?, ?, ?)</code></td><td>Executes windowed group advancement procedure</td></tr><tr><td><code>POST /coordinator/awards</code></td><td>Podium Generator</td><td><code>stage</code> $\bowtie$ <code>event</code>, transactional query on <code>match</code></td><td>Identifies 1st/2nd place winners from final match</td></tr></table></div>
+<hr>
+<h1 id="7-dbms-lab-viva-defense-oral-examination-cheat-sheet">7. DBMS Lab Viva Defense &amp; Oral Examination Cheat-Sheet</h1>
+<p>Here are the 10 most common questions examiners ask about Joins and Aggregates, with model answers tailored to this project.</p>
+<h3 id="q1-why-did-you-use-a-left-join-in-your-points-table-instead-of-an-inner-join">Q1: "Why did you use a <code>LEFT JOIN</code> in your points table instead of an <code>INNER JOIN</code>?"</h3>
+<blockquote><p><strong>Model Answer:</strong></p></blockquote>
+<blockquote><p>An <code>INNER JOIN</code> requires matching records in both tables. When a tournament stage is newly created, no matches have been played yet. If we used an <code>INNER JOIN</code> between teams and matches, all newly registered teams would be discarded and the points table would be completely empty!</p></blockquote>
+<blockquote><p>By using a <code>LEFT JOIN</code> from <code>stage_teams</code> to <code>team_results</code>, we guarantee that every registered team appears on the board immediately. For teams with no matches, match columns are <code>NULL</code>, which we turn into <code>0</code> using <code>COUNT(tr.team_id)</code> and <code>COALESCE(SUM(...), 0)</code>.</p></blockquote>
+<h3 id="q2-what-is-the-difference-between-count-and-countcolumn">Q2: "What is the difference between <code>COUNT(*)</code> and <code>COUNT(column)</code>?"</h3>
+<blockquote><p><strong>Model Answer:</strong></p></blockquote>
+<blockquote><p><code>COUNT(*)</code> counts the total number of rows in a partition, regardless of whether columns contain <code>NULL</code>. In contrast, <code>COUNT(column)</code> evaluates that specific column and ignores any <code>NULL</code> values.</p></blockquote>
+<blockquote><p>In our points table, when a team has played zero matches, the <code>LEFT JOIN</code> produces a row with <code>NULL</code> for <code>tr.team_id</code>. If we wrote <code>COUNT(*)</code>, it would count the row and falsely report 1 match played. By writing <code>COUNT(tr.team_id)</code>, MySQL ignores the <code>NULL</code> and correctly returns 0.</p></blockquote>
+<h3 id="q3-what-is-the-difference-between-where-and-having">Q3: "What is the difference between <code>WHERE</code> and <code>HAVING</code>?"</h3>
+<blockquote><p><strong>Model Answer:</strong></p></blockquote>
+<blockquote><p>In the SQL execution lifecycle, <code>WHERE</code> executes <em>before</em> grouping occurs and filters individual rows. <code>HAVING</code> executes <em>after</em> <code>GROUP BY</code> and filters the aggregated groups based on summary functions.</p></blockquote>
+<blockquote><p>For example, in Query <code>Q05</code>, we use <code>HAVING COUNT(s.student_id) &gt;= 5</code> to filter department groups after student counts have been calculated. A <code>WHERE</code> clause cannot do this because aggregates do not exist prior to grouping.</p></blockquote>
+<h3 id="q4-why-did-you-choose-dense_rank-over-rank-and-row_number-for-standings">Q4: "Why did you choose <code>DENSE_RANK()</code> over <code>RANK()</code> and <code>ROW_NUMBER()</code> for standings?"</h3>
+<blockquote><p><strong>Model Answer:</strong></p></blockquote>
+<blockquote><p><code>ROW_NUMBER()</code> assigns strictly distinct integers and would arbitrarily break ties between teams with identical records. <code>RANK()</code> leaves gaps in the ranking sequence (for example, if two teams tie for 1st, the next team is assigned rank 3).</p></blockquote>
+<blockquote><p><code>DENSE_RANK()</code> assigns identical ranks to tied teams without skipping numbers (1st, 1st, 2nd, 3rd), which matches official sports tournament podium rules.</p></blockquote>
+<h3 id="q5-how-does-sumaward_type-gold-work-without-a-case-statement">Q5: "How does <code>SUM(award_type = 'gold')</code> work without a <code>CASE</code> statement?"</h3>
+<blockquote><p><strong>Model Answer:</strong></p></blockquote>
+<blockquote><p>In MySQL, boolean conditions evaluate to integer <code>1</code> when true and <code>0</code> when false. In <code>v_medal_tally</code>, when a department's award is <code>'gold'</code>, <code>(award_type = 'gold')</code> evaluates to <code>1</code>. Summing these values calculates the exact gold medal tally in a single pass without needing three separate queries or complex joins.</p></blockquote>
+<h3 id="q6-why-do-you-cast-goal-attributes-to-signed-before-subtraction">Q6: "Why do you cast goal attributes to <code>SIGNED</code> before subtraction?"</h3>
+<blockquote><p><strong>Model Answer:</strong></p></blockquote>
+<blockquote><p>In our schema, <code>home_score</code> and <code>away_score</code> are declared as <code>SMALLINT UNSIGNED</code> to prevent negative scores. However, under MySQL's strict SQL mode, subtracting an unsigned integer from a smaller unsigned integer (e.g., $1 - 4$) causes a fatal out-of-range arithmetic overflow.</p></blockquote>
+<blockquote><p>We use <code>CAST(tr.goals_for AS SIGNED) - CAST(tr.goals_against AS SIGNED)</code> to ensure the difference can be negative (e.g., $-3$) for teams that concede more goals than they score.</p></blockquote>
+<h3 id="q7-what-is-a-common-table-expression-cte-and-why-use-it-over-subqueries">Q7: "What is a Common Table Expression (CTE) and why use it over subqueries?"</h3>
+<blockquote><p><strong>Model Answer:</strong></p></blockquote>
+<blockquote><p>A CTE is a temporary, named result set defined with <code>WITH ... AS</code>. We use CTEs in <code>v_points_table</code> and <code>v_medal_tally</code> because they make complex multi-step queries modular and readable. In <code>v_points_table</code>, we separate seed team gathering, match result unpivoting, and final mathematical aggregation into three clean steps. CTEs also allow MySQL's optimizer to materialize or inline intermediate steps efficiently.</p></blockquote>
+<h3 id="q8-how-does-mysql-execute-joins-internally-under-innodb">Q8: "How does MySQL execute joins internally under InnoDB?"</h3>
+<blockquote><p><strong>Model Answer:</strong></p></blockquote>
+<blockquote><p>When foreign key and primary key columns are indexed, MySQL uses an <strong>Index Nested-Loop Join (INLJ)</strong>. For each row in the driving table, it performs an $O(\log N)$ B-tree index lookup on the joined table. If no index is available for an equi-join, MySQL 8.0 uses an in-memory <strong>Hash Join</strong>, building a hash table on the smaller relation and probing it with the larger relation in $O(M+N)$ time.</p></blockquote>
+<h3 id="q9-why-does-the-match-table-join-the-team-table-twice-in-v_match_schedule">Q9: "Why does the <code>match</code> table join the <code>team</code> table twice in <code>v_match_schedule</code>?"</h3>
+<blockquote><p><strong>Model Answer:</strong></p></blockquote>
+<blockquote><p>A match involves two distinct teams from the same entity set: a home team and an away team. The <code>match</code> relation has two foreign keys: <code>home_team_id</code> and <code>away_team_id</code>. To display the names of both teams in a single row, we must join <code>team</code> twice using table aliases (<code>home</code> and <code>away</code>).</p></blockquote>
+<h3 id="q10-how-did-you-solve-the-exclusive-arc-relationship-in-awards">Q10: "How did you solve the Exclusive ARC relationship in awards?"</h3>
+<blockquote><p><strong>Model Answer:</strong></p></blockquote>
+<blockquote><p>An award can belong to either a team or an individual student, enforced by the check constraint <code>(student_id IS NOT NULL) &lt;&gt; (team_id IS NOT NULL)</code>. In <code>v_medal_tally</code>, we used a CTE with <code>UNION ALL</code> to merge two join paths: one joining <code>award</code> $\rightarrow$ <code>team</code> $\rightarrow$ <code>department</code>, and another joining <code>award</code> $\rightarrow$ <code>student</code> $\rightarrow$ <code>department</code>. This projects a unified <code>(department_id, award_type)</code> relation that is then grouped and aggregated.</p></blockquote>
+<hr>
+<p><em>End of DBMS Queries, Joins, and Aggregates Comprehensive Guide.</em></p>
+</body>
+</html>

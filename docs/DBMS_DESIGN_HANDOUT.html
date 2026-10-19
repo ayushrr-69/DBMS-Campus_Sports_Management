@@ -1,0 +1,600 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Campus Sports DBMS — Complete Design &amp; Architectural Handout</title>
+  <style>
+    @page {
+      size: A4 portrait;
+      margin: 18mm 16mm 18mm 16mm;
+    }
+    *, *::before, *::after {
+      box-sizing: border-box;
+    }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      font-size: 10pt;
+      line-height: 1.55;
+      color: #1e293b;
+      background: #ffffff;
+      margin: 0;
+      padding: 0;
+    }
+    h1, h2, h3, h4 {
+      color: #0f172a;
+      font-weight: 700;
+      line-height: 1.25;
+      page-break-after: avoid;
+    }
+    h1 {
+      font-size: 20pt;
+      border-bottom: 2.5px solid #2563eb;
+      padding-bottom: 6px;
+      margin-top: 0;
+      margin-bottom: 12px;
+      color: #1e3a8a;
+    }
+    h2 {
+      font-size: 14pt;
+      border-bottom: 1.5px solid #e2e8f0;
+      padding-bottom: 4px;
+      margin-top: 22px;
+      margin-bottom: 10px;
+      color: #1e40af;
+      page-break-after: avoid;
+    }
+    h3 {
+      font-size: 11.5pt;
+      margin-top: 16px;
+      margin-bottom: 6px;
+      color: #0f172a;
+      page-break-after: avoid;
+    }
+    h4 {
+      font-size: 10.5pt;
+      margin-top: 12px;
+      margin-bottom: 4px;
+      color: #334155;
+      page-break-after: avoid;
+    }
+    p {
+      margin-top: 0;
+      margin-bottom: 8px;
+    }
+    blockquote {
+      margin: 8px 0 12px 0;
+      padding: 8px 14px;
+      background: #eff6ff;
+      border-left: 4px solid #3b82f6;
+      border-radius: 0 6px 6px 0;
+      color: #1e40af;
+      font-size: 9.5pt;
+      page-break-inside: avoid;
+    }
+    blockquote p {
+      margin: 0;
+    }
+    ul, ol {
+      margin-top: 4px;
+      margin-bottom: 10px;
+      padding-left: 22px;
+    }
+    li {
+      margin-bottom: 3px;
+    }
+    code {
+      font-family: "Consolas", "Courier New", monospace;
+      font-size: 8.8pt;
+      background: #f1f5f9;
+      color: #0f172a;
+      padding: 1.5px 4.5px;
+      border-radius: 4px;
+      border: 1px solid #e2e8f0;
+    }
+    pre {
+      background: #0f172a;
+      color: #f8fafc;
+      padding: 10px 12px;
+      border-radius: 6px;
+      overflow-x: auto;
+      font-size: 8.5pt;
+      line-height: 1.45;
+      margin-top: 6px;
+      margin-bottom: 12px;
+      page-break-inside: avoid;
+    }
+    pre code {
+      background: transparent;
+      color: inherit;
+      padding: 0;
+      border: none;
+      font-size: inherit;
+    }
+    hr {
+      border: none;
+      border-top: 1px solid #cbd5e1;
+      margin: 18px 0;
+    }
+    .table-wrap {
+      margin: 10px 0 14px 0;
+      page-break-inside: avoid;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 8.8pt;
+    }
+    th, td {
+      border: 1px solid #cbd5e1;
+      padding: 6px 9px;
+      text-align: left;
+      vertical-align: top;
+    }
+    th {
+      background: #f8fafc;
+      color: #0f172a;
+      font-weight: 700;
+      border-bottom: 2px solid #94a3b8;
+    }
+    tr:nth-child(even) td {
+      background: #fcfdfe;
+    }
+    a {
+      color: #2563eb;
+      text-decoration: none;
+    }
+    .diagram-pre {
+      font-family: "Consolas", monospace;
+      font-size: 8pt;
+      line-height: 1.25;
+      background: #f8fafc;
+      color: #1e293b;
+      border: 1px solid #cbd5e1;
+      border-radius: 6px;
+      padding: 10px;
+    }
+  </style>
+</head>
+<body>
+<h1 id="campus-sports-dbms-complete-design-architectural-handout">Campus Sports DBMS — Complete Design &amp; Architectural Handout</h1>
+<blockquote><p><strong>Audience</strong>: Complete Ground-Zero Guide for Lab Defense, Viva Examination, and Deep Technical Understanding.</p></blockquote>
+<blockquote><p><strong>Database Engine</strong>: MySQL 8.0 Community Edition (InnoDB, <code>utf8mb4_0900_ai_ci</code>).</p></blockquote>
+<blockquote><p><strong>Schema Size</strong>: 18 Normalized Relations, 6 Active Triggers, 3 Analytical Views.</p></blockquote>
+<hr>
+<h2 id="table-of-contents">Table of Contents</h2>
+<ol>
+<li><a href="#1-core-philosophy--architecture-starting-from-zero">Core Philosophy &amp; Architecture: Starting From Zero</a></li>
+<li><a href="#2-fundamental-relational-concepts-explained">Fundamental Relational Concepts Explained</a></li>
+<li><a href="#3-the-5-logical-clusters-of-the-18-tables">The 5 Logical Clusters of the 18 Tables</a></li>
+<li><a href="#4-deep-dive-how-every-relation-works-and-connects">Deep-Dive: How Every Relation Works and Connects</a></li>
+<li><a href="#5-key-architectural-patterns-viva-goldmines">Key Architectural Patterns (Viva Goldmines)</a></li>
+<li><a href="#6-database-triggers-what-they-are--deep-analysis">Database Triggers: What They Are &amp; Deep Analysis</a></li>
+<li><a href="#7-the-standings-engine-why-we-use-views-instead-of-stored-tables">The Standings Engine: Why We Use Views Instead of Stored Tables</a></li>
+<li><a href="#8-viva--oral-defense-quick-reference">Viva &amp; Oral Defense Quick Reference</a></li>
+</ol>
+<hr>
+<h2 id="1-core-philosophy-architecture-starting-from-zero">1. Core Philosophy &amp; Architecture: Starting From Zero</h2>
+<h3 id="what-is-an-rdbms">What is an RDBMS?</h3>
+<p>A <strong>Relational Database Management System (RDBMS)</strong> organizes data into structured two-dimensional grids called <strong>tables</strong> (or <strong>relations</strong>), consisting of columns (attributes) and rows (tuples). Relationships between tables are created using values stored in columns, rather than physical pointers.</p>
+<h3 id="the-philosophy-of-this-project">The Philosophy of This Project</h3>
+<p>In many novice web applications, database safety is treated as an afterthought: developers write code in JavaScript or Python to validate rules (e.g. checking if two matches clash or if a student is old enough). If someone connects via MySQL Workbench, imports a CSV, or has a bug in their backend code, the database gets corrupted.</p>
+<p>In our project:</p>
+<blockquote><p><strong>The Database is the Engine; the Node.js/Express Web App is only a Thin Lens.</strong></p></blockquote>
+<p>Every business rule, scheduling limit, eligibility check, and data consistency rule is enforced <strong>at the database tier</strong> using:</p>
+<ul>
+<li>Strict <strong>Primary and Candidate Unique Keys</strong></li>
+<li><strong>Foreign Key Referential Actions</strong> (<code>CASCADE</code>, <code>RESTRICT</code>, <code>SET NULL</code>)</li>
+<li>Database <strong>CHECK Constraints</strong></li>
+<li>Event-driven <strong>Database Triggers</strong></li>
+<li>Virtual derived <strong>SQL Views</strong></li>
+</ul>
+<p>Even if the web server crashes or a rogue query is executed directly in MySQL, <strong>the database will refuse to enter an invalid state</strong>.</p>
+<hr>
+<h2 id="2-fundamental-relational-concepts-explained">2. Fundamental Relational Concepts Explained</h2>
+<p>Before analyzing the 18 tables, understand these three building blocks:</p>
+<h3 id="a-keys">A. Keys</h3>
+<ul>
+<li><strong>Primary Key (PK)</strong>: A column (or set of columns) that uniquely identifies each individual row in a table. In our schema, every strong entity uses a surrogate integer <code>&lt;table&gt;_id</code> with <code>AUTO_INCREMENT</code>.</li>
+<li><strong>Candidate / Unique Key (UQ)</strong>: Other columns that must be unique across the table (e.g., <code>student.roll_number</code>, <code>department.name</code>, <code>(tournament_id, name)</code>).</li>
+</ul>
+<h3 id="b-foreign-keys-referential-actions">B. Foreign Keys &amp; Referential Actions</h3>
+<p>A <strong>Foreign Key (FK)</strong> is a column in a child table pointing to the Primary Key of a parent table. It prevents orphan rows. When a parent row is modified or deleted, MySQL enforces a <strong>Referential Action</strong>:</p>
+<ol>
+<li><strong><code>ON DELETE CASCADE</code></strong>:  </li>
+</ol>
+<p>If the parent is deleted, delete all children automatically.</p>
+<p><em>Example</em>: If an <code>event</code> is deleted, its <code>stage</code> records and <code>eligibility_rule</code> are deleted automatically because they have no meaning without that event.</p>
+<ol>
+<li><strong><code>ON DELETE RESTRICT</code></strong>:  </li>
+</ol>
+<p>Rejects the deletion of the parent if any child rows still reference it.</p>
+<p><em>Example</em>: You cannot delete a <code>department</code> if there are still students or teams enrolled in it. You cannot delete a <code>team</code> if it has match history.</p>
+<ol>
+<li><strong><code>ON DELETE SET NULL</code></strong>:  </li>
+</ol>
+<p>Leaves the child row intact, but clears the foreign key column to <code>NULL</code>.</p>
+<p><em>Example</em>: If a student who was a team captain leaves college (<code>student</code> deleted), <code>team.captain_id</code> is set to <code>NULL</code> so the team itself is not erased.</p>
+<h3 id="c-database-check-constraints">C. Database <code>CHECK</code> Constraints</h3>
+<p>In MySQL 8.0, <code>CHECK</code> constraints validate boolean expressions before allowing an <code>INSERT</code> or <code>UPDATE</code>. If the condition evaluates to <code>FALSE</code>, the database aborts the transaction with an error.</p>
+<p><em>Example</em>: <code>CONSTRAINT ck_tournament_dates CHECK (end_date &gt;= start_date)</code>.</p>
+<hr>
+<h2 id="3-the-5-logical-clusters-of-the-18-tables">3. The 5 Logical Clusters of the 18 Tables</h2>
+<p>To understand 18 tables effortlessly, divide them into <strong>5 logical functional clusters</strong>:</p>
+<pre><code class="language-"> ┌───────────────────────────┐       ┌───────────────────────────┐
+ │ 1. Identity &amp; Foundation  │       │ 2. Competitions &amp; Venues  │
+ │  department, student,     │       │  sport, venue,            │
+ │  app_user                 │       │  sport_venue, tournament, │
+ └─────────────┬─────────────┘       │  event, eligibility_rule  │
+               │                     └─────────────┬─────────────┘
+               ▼                                   ▼
+ ┌───────────────────────────┐       ┌───────────────────────────┐
+ │ 3. Squads &amp; Registrations │◄──────┤ 4. Stages &amp; Team Matches  │
+ │  team, team_member,       │       │  stage, match,            │
+ │  registration             │       │  match_event              │
+ └─────────────┬─────────────┘       └─────────────┬─────────────┘
+               │                                   │
+               ▼                                   ▼
+ ┌───────────────────────────────────────────────────────────────┐
+ │ 5. Athletics, Officiating &amp; Accolades                         │
+ │  individual_result, official, award                           │
+ └───────────────────────────────────────────────────────────────┘</code></pre>
+<ol>
+<li><strong>Cluster 1: Identity &amp; Foundation</strong> (<code>department</code>, <code>student</code>, <code>app_user</code>): Campus academic units, students, and authentication identities.</li>
+<li><strong>Cluster 2: Competitions &amp; Venues</strong> (<code>sport</code>, <code>venue</code>, <code>sport_venue</code>, <code>tournament</code>, <code>event</code>, <code>eligibility_rule</code>): What games are played, where they can be played, tournament editions, specific events, and age/year criteria.</li>
+<li><strong>Cluster 3: Squads &amp; Registrations</strong> (<code>team</code>, <code>team_member</code>, <code>registration</code>): Teams entered by departments, athlete rosters with jersey numbers, and formal entry records into events.</li>
+<li><strong>Cluster 4: Stages &amp; Team Matches</strong> (<code>stage</code>, <code>match</code>, <code>match_event</code>): Group/knockout rounds, head-to-head fixtures with scores/times/venues, and minute-by-minute goals/cards.</li>
+<li><strong>Cluster 5: Athletics, Officiating &amp; Accolades</strong> (<code>individual_result</code>, <code>official</code>, <code>award</code>): Individual track/field results, referees/umpires assigned to matches or heats, and medals/trophies.</li>
+</ol>
+<hr>
+<h2 id="4-deep-dive-how-every-relation-works-and-connects">4. Deep-Dive: How Every Relation Works and Connects</h2>
+<h3 id="cluster-1-identity-foundation">Cluster 1: Identity &amp; Foundation</h3>
+<h4 id="1-department">1. <code>department</code></h4>
+<ul>
+<li><strong>Real-World Meaning</strong>: Represents an academic branch (e.g. Computer Science, Mechanical) or residential hall/hostel competing in the sports fest.</li>
+<li><strong>Primary Key</strong>: <code>department_id</code></li>
+<li><strong>Candidate Key</strong>: <code>name</code> (Unique)</li>
+<li><strong>Columns</strong>: <code>name</code>, <code>department_type</code> (<code>'department'</code>, <code>'hostel'</code>)</li>
+<li><strong>Relationships</strong>:</li>
+<li><strong>1 : N with <code>student</code></strong>: One department has many students.</li>
+<li><strong>1 : N with <code>team</code></strong>: One department enters many sports teams.</li>
+<li><strong>Integrity Action</strong>: <code>ON DELETE RESTRICT</code> prevents wiping out an academic department if students or teams are active.</li>
+</ul>
+<h4 id="2-student">2. <code>student</code></h4>
+<ul>
+<li><strong>Real-World Meaning</strong>: A verified college student eligible to compete, join teams, or captain squads.</li>
+<li><strong>Primary Key</strong>: <code>student_id</code></li>
+<li><strong>Foreign Keys</strong>: <code>department_id</code> → <code>department.department_id</code> (<code>RESTRICT</code> delete, <code>CASCADE</code> update).</li>
+<li><strong>Candidate Key</strong>: <code>roll_number</code> (Unique college identifier).</li>
+<li><strong>CHECK Constraint</strong>: <code>academic_year BETWEEN 1 AND 6</code>.</li>
+<li><strong>Relationships</strong>:</li>
+<li>Can captain a <code>team</code> (0..1 : 1).</li>
+<li>Can belong to multiple teams via <code>team_member</code> (1 : N).</li>
+<li>Can register directly for individual athletics events via <code>registration</code> (1 : N).</li>
+<li>Can have one login user account in <code>app_user</code> (1 : 0..1).</li>
+</ul>
+<h4 id="3-app_user">3. <code>app_user</code></h4>
+<ul>
+<li><strong>Real-World Meaning</strong>: Authenticated user accounts for the web system.</li>
+<li><strong>Primary Key</strong>: <code>app_user_id</code></li>
+<li><strong>Foreign Key</strong>: <code>student_id</code> → <code>student.student_id</code> (Nullable, Unique).</li>
+<li><strong>Role ENUM</strong>: <code>'admin'</code>, <code>'coordinator'</code>, <code>'player'</code>, <code>'viewer'</code>.</li>
+<li><strong>Design Note</strong>: A viewer, admin, or coordinator does not require a student record (<code>student_id</code> can be <code>NULL</code>). If a student logs in, their account links 1-to-1 with their student identity.</li>
+</ul>
+<hr>
+<h3 id="cluster-2-competitions-facilities">Cluster 2: Competitions &amp; Facilities</h3>
+<h4 id="4-sport">4. <code>sport</code></h4>
+<ul>
+<li><strong>Real-World Meaning</strong>: The sport discipline (e.g. Football, Basketball, 100 Metres Sprint).</li>
+<li><strong>Primary Key</strong>: <code>sport_id</code></li>
+<li><strong>Key Attribute</strong>: <code>is_team_sport</code> (<code>BOOLEAN</code>).</li>
+<li>If <code>TRUE</code>: Competition follows team squads, groups, home/away fixtures (<code>match</code>), and points tables.</li>
+<li>If <code>FALSE</code>: Competition follows individual athletes, heats, and ranked metric results (<code>individual_result</code>).</li>
+</ul>
+<h4 id="5-venue">5. <code>venue</code></h4>
+<ul>
+<li><strong>Real-World Meaning</strong>: A physical ground, court, synthetic track, or indoor hall on campus.</li>
+<li><strong>Primary Key</strong>: <code>venue_id</code></li>
+<li><strong>Candidate Key</strong>: <code>name</code> (e.g. "Main Stadium Turf", "Court B").</li>
+<li><strong>Relationships</strong>: Hosts scheduled matches and athletics heats. Protected against time conflicts by database triggers.</li>
+</ul>
+<h4 id="6-sport_venue-many-to-many-associative-entity">6. <code>sport_venue</code> (Many-to-Many Associative Entity)</h4>
+<ul>
+<li><strong>Real-World Meaning</strong>: Specifies which sports are physically compatible with which campus venues.</li>
+<li><strong>Composite Primary Key</strong>: <code>(sport_id, venue_id)</code></li>
+<li><strong>Foreign Keys</strong>:</li>
+<li><code>sport_id</code> → <code>sport.sport_id</code> (<code>CASCADE</code>)</li>
+<li><code>venue_id</code> → <code>venue.venue_id</code> (<code>CASCADE</code>)</li>
+<li><strong>Why it exists</strong>: A basketball court cannot host a 100m sprint track event, nor can an indoor hall host football. This relation enforces facility suitability.</li>
+</ul>
+<h4 id="7-tournament">7. <code>tournament</code></h4>
+<ul>
+<li><strong>Real-World Meaning</strong>: The overall tournament edition (e.g., "Campus Sports Meet 2026").</li>
+<li><strong>Primary Key</strong>: <code>tournament_id</code></li>
+<li><strong>Candidate Key</strong>: <code>(name, start_date)</code></li>
+<li><strong>CHECK Constraint</strong>: <code>ck_tournament_dates CHECK (end_date &gt;= start_date)</code>. Ensures chronological sanity.</li>
+<li><strong>Relationships</strong>: Parent container of all events.</li>
+</ul>
+<h4 id="8-event">8. <code>event</code></h4>
+<ul>
+<li><strong>Real-World Meaning</strong>: A specific competition category under a tournament for a given sport (e.g. "Men's 100m Sprint" or "Inter-Department Football Championship").</li>
+<li><strong>Primary Key</strong>: <code>event_id</code></li>
+<li><strong>Foreign Keys</strong>:</li>
+<li><code>tournament_id</code> → <code>tournament.tournament_id</code> (<code>RESTRICT</code>)</li>
+<li><code>sport_id</code> → <code>sport.sport_id</code> (<code>RESTRICT</code>)</li>
+<li><strong>Attributes</strong>: <code>gender_category</code> (<code>'men'</code>, <code>'women'</code>, <code>'mixed'</code>, <code>'open'</code>), <code>format</code> (<code>'group_knockout'</code>, <code>'knockout'</code>, <code>'heats'</code>).</li>
+<li><strong>Candidate Key</strong>: <code>(tournament_id, name)</code> (Cannot have duplicate event names in the same tournament).</li>
+</ul>
+<h4 id="9-eligibility_rule-weak-auxiliary-entity">9. <code>eligibility_rule</code> (Weak / Auxiliary Entity)</h4>
+<ul>
+<li><strong>Real-World Meaning</strong>: Quantitative criteria governing who is allowed to enter an event.</li>
+<li><strong>Primary Key</strong>: <code>eligibility_rule_id</code></li>
+<li><strong>Foreign Key</strong>: <code>event_id</code> → <code>event.event_id</code> (<code>CASCADE</code>, Unique). Exactly one rule per event.</li>
+<li><strong>CHECK Constraints</strong>: Ensures <code>max_year &gt;= min_year</code> and <code>max_age &gt;= min_age</code>.</li>
+<li><strong>Attributes</strong>: <code>min_year</code>, <code>max_year</code>, <code>gender</code>, <code>min_age</code>, <code>max_age</code>.</li>
+<li><strong>How it works</strong>: When a student attempts to register for an event, triggers read this table to approve or abort the transaction.</li>
+</ul>
+<hr>
+<h3 id="cluster-3-squads-registrations">Cluster 3: Squads &amp; Registrations</h3>
+<h4 id="10-team">10. <code>team</code></h4>
+<ul>
+<li><strong>Real-World Meaning</strong>: A department-sponsored team entered to compete in team sports (e.g., "CS Strikers", "Mech Warriors").</li>
+<li><strong>Primary Key</strong>: <code>team_id</code></li>
+<li><strong>Foreign Keys</strong>:</li>
+<li><code>department_id</code> → <code>department.department_id</code> (<code>RESTRICT</code> delete, <code>CASCADE</code> update).</li>
+<li><code>captain_id</code> → <code>student.student_id</code> (<code>SET NULL</code> delete).</li>
+<li><strong>Candidate Key</strong>: <code>(department_id, name)</code> (A department cannot have two teams with the identical name).</li>
+</ul>
+<h4 id="11-team_member-many-to-many-associative-entity">11. <code>team_member</code> (Many-to-Many Associative Entity)</h4>
+<ul>
+<li><strong>Real-World Meaning</strong>: Roster connecting students to teams with jersey numbers.</li>
+<li><strong>Composite Primary Key</strong>: <code>(team_id, student_id)</code></li>
+<li><strong>Foreign Keys</strong>:</li>
+<li><code>team_id</code> → <code>team.team_id</code> (<code>CASCADE</code>)</li>
+<li><code>student_id</code> → <code>student.student_id</code> (<code>CASCADE</code>)</li>
+<li><strong>Candidate Key</strong>: <code>(team_id, jersey_number)</code> (No two players on the same team can wear the same jersey number).</li>
+<li><strong>CHECK Constraint</strong>: <code>jersey_number BETWEEN 0 AND 99</code>.</li>
+</ul>
+<h4 id="12-registration-the-gateway-relation">12. <code>registration</code> (The Gateway Relation)</h4>
+<ul>
+<li><strong>Real-World Meaning</strong>: The official entry of an entity into a tournament event.</li>
+<li><strong>Primary Key</strong>: <code>registration_id</code></li>
+<li><strong>Foreign Keys</strong>:</li>
+<li><code>event_id</code> → <code>event.event_id</code> (<code>RESTRICT</code>)</li>
+<li><code>student_id</code> → <code>student.student_id</code> (Nullable, <code>RESTRICT</code>)</li>
+<li><code>team_id</code> → <code>team.team_id</code> (Nullable, <code>RESTRICT</code>)</li>
+<li><strong>Exclusive CHECK</strong>: <code>CONSTRAINT ck_registration_exactly_one_entrant CHECK ((student_id IS NOT NULL) &lt;&gt; (team_id IS NOT NULL))</code></li>
+<li><strong>Candidate Keys</strong>:</li>
+<li><code>(event_id, student_id)</code>: A student cannot register for the same event twice.</li>
+<li><code>(event_id, team_id)</code>: A team cannot register for the same event twice.</li>
+</ul>
+<hr>
+<h3 id="cluster-4-competition-stages-team-fixtures">Cluster 4: Competition Stages &amp; Team Fixtures</h3>
+<h4 id="13-stage">13. <code>stage</code></h4>
+<ul>
+<li><strong>Real-World Meaning</strong>: A sequential competitive phase within an event (e.g. "Group A", "Quarter Finals", "Heats Round 1").</li>
+<li><strong>Primary Key</strong>: <code>stage_id</code></li>
+<li><strong>Foreign Key</strong>: <code>event_id</code> → <code>event.event_id</code> (<code>CASCADE</code>).</li>
+<li><strong>Candidate Keys</strong>:</li>
+<li><code>(event_id, stage_order)</code>: Stage sequencing must be unique (e.g., 1, 2, 3).</li>
+<li><code>(event_id, name)</code>: Stage names must be distinct within the event.</li>
+<li><strong>ENUM</strong>: <code>stage_type</code> (<code>'group'</code>, <code>'quarter_final'</code>, <code>'semi_final'</code>, <code>'final'</code>, <code>'heat'</code>).</li>
+</ul>
+<h4 id="14-match-reserved-identifier-escaped-with-backticks">14. <code>match</code> (Reserved Identifier: Escaped with Backticks)</h4>
+<ul>
+<li><strong>Real-World Meaning</strong>: A scheduled head-to-head contest between two teams.</li>
+<li><strong>Primary Key</strong>: <code>match_id</code></li>
+<li><strong>Foreign Keys</strong>:</li>
+<li><code>stage_id</code> → <code>stage.stage_id</code> (<code>RESTRICT</code>)</li>
+<li><code>venue_id</code> → <code>venue.venue_id</code> (<code>RESTRICT</code>)</li>
+<li><code>home_team_id</code> → <code>team.team_id</code> (<code>RESTRICT</code>)</li>
+<li><code>away_team_id</code> → <code>team.team_id</code> (<code>RESTRICT</code>)</li>
+<li><strong>CHECK Constraints</strong>:</li>
+<li><code>ck_match_distinct_teams CHECK (home_team_id &lt;&gt; away_team_id)</code>: A team cannot play against itself!</li>
+<li><code>ck_match_duration CHECK (duration_minutes BETWEEN 1 AND 600)</code>.</li>
+<li><strong>State Management</strong>: <code>status</code> (<code>'scheduled'</code>, <code>'live'</code>, <code>'completed'</code>, <code>'cancelled'</code>).</li>
+</ul>
+<h4 id="15-match_event">15. <code>match_event</code></h4>
+<ul>
+<li><strong>Real-World Meaning</strong>: Granular incident log occurring during a match (e.g. goals, red cards, wickets).</li>
+<li><strong>Primary Key</strong>: <code>match_event_id</code></li>
+<li><strong>Foreign Keys</strong>:</li>
+<li><code>match_id</code> → <code>match.match_id</code> (<code>CASCADE</code>)</li>
+<li><code>student_id</code> → <code>student.student_id</code> (Nullable player who scored/fouled, <code>RESTRICT</code>)</li>
+<li><code>team_id</code> → <code>team.team_id</code> (Nullable team, <code>RESTRICT</code>)</li>
+<li><strong>Attributes</strong>: <code>minute</code>, <code>event_type</code> (<code>'goal'</code>, <code>'wicket'</code>, <code>'yellow_card'</code>, <code>'red_card'</code>, etc.), <code>details</code>.</li>
+</ul>
+<hr>
+<h3 id="cluster-5-athletics-officiating-accolades">Cluster 5: Athletics, Officiating &amp; Accolades</h3>
+<h4 id="16-individual_result">16. <code>individual_result</code></h4>
+<ul>
+<li><strong>Real-World Meaning</strong>: Recorded time, distance, or score for a student competing in an individual athletics heat.</li>
+<li><strong>Primary Key</strong>: <code>individual_result_id</code></li>
+<li><strong>Foreign Keys</strong>:</li>
+<li><code>registration_id</code> → <code>registration.registration_id</code> (<code>CASCADE</code>)</li>
+<li><code>stage_id</code> → <code>stage.stage_id</code> (<code>CASCADE</code>)</li>
+<li><code>venue_id</code> → <code>venue.venue_id</code> (<code>RESTRICT</code>)</li>
+<li><strong>Candidate Key</strong>: <code>(registration_id, stage_id)</code>: An entrant has exactly one result per heat stage.</li>
+<li><strong>Attributes</strong>: <code>result_value</code> (e.g., 10.420), <code>result_unit</code> (<code>'seconds'</code>, <code>'metres'</code>, <code>'points'</code>), <code>result_rank</code>.</li>
+</ul>
+<h4 id="17-official">17. <code>official</code></h4>
+<ul>
+<li><strong>Real-World Meaning</strong>: Referees, line judges, or timekeepers appointed to officiate matches or track heats.</li>
+<li><strong>Primary Key</strong>: <code>official_id</code></li>
+<li><strong>Foreign Keys</strong>:</li>
+<li><code>match_id</code> → <code>match.match_id</code> (Nullable, <code>RESTRICT</code>)</li>
+<li><code>individual_result_id</code> → <code>individual_result.individual_result_id</code> (Nullable, <code>RESTRICT</code>)</li>
+<li><strong>Exclusive CHECK</strong>: <code>CONSTRAINT ck_official_exactly_one_assignment CHECK ((match_id IS NOT NULL) &lt;&gt; (individual_result_id IS NOT NULL))</code>.</li>
+</ul>
+<h4 id="18-award">18. <code>award</code></h4>
+<ul>
+<li><strong>Real-World Meaning</strong>: Podiums, trophies, and awards granted at the conclusion of an event.</li>
+<li><strong>Primary Key</strong>: <code>award_id</code></li>
+<li><strong>Foreign Keys</strong>:</li>
+<li><code>event_id</code> → <code>event.event_id</code> (<code>RESTRICT</code>)</li>
+<li><code>student_id</code> → <code>student.student_id</code> (Nullable, <code>RESTRICT</code>)</li>
+<li><code>team_id</code> → <code>team.team_id</code> (Nullable, <code>RESTRICT</code>)</li>
+<li><strong>Exclusive CHECK</strong>: <code>CONSTRAINT ck_award_exactly_one_recipient CHECK ((student_id IS NOT NULL) &lt;&gt; (team_id IS NOT NULL))</code>.</li>
+<li><strong>Attributes</strong>: <code>award_type</code> (<code>'gold'</code>, <code>'silver'</code>, <code>'bronze'</code>, <code>'player_of_tournament'</code>, <code>'department_trophy'</code>), <code>award_rank</code>, <code>awarded_at</code>.</li>
+</ul>
+<hr>
+<h2 id="5-key-architectural-patterns-viva-goldmines">5. Key Architectural Patterns (Viva Goldmines)</h2>
+<p>Examiners love asking about real-world relational design patterns. Here are the core patterns in this schema:</p>
+<h3 id="pattern-1-the-exclusive-arc-pattern-disjoint-polymorphism">Pattern 1: The Exclusive ARC Pattern (Disjoint Polymorphism)</h3>
+<ul>
+<li><strong>The Problem</strong>: A registration can belong to a <strong>Student</strong> (for 100m sprint) OR a <strong>Team</strong> (for Football). In standard SQL, a foreign key can only reference one table.</li>
+<li><strong>Bad Solution (Anti-pattern)</strong>: Storing <code>entrant_type</code> ('student'/'team') and an untyped integer <code>entrant_id</code>. This destroys referential integrity because MySQL cannot enforce foreign keys against dynamic tables.</li>
+<li><strong>Our Solution (The Relational Arc)</strong>:</li>
+</ul>
+<p>Store two nullable foreign keys: <code>student_id</code> and <code>team_id</code>, governed by a mathematical <code>CHECK</code>:</p>
+<pre><code class="language-sql">  CONSTRAINT ck_registration_exactly_one_entrant 
+  CHECK ((student_id IS NOT NULL) &lt;&gt; (team_id IS NOT NULL))</code></pre>
+<p>In boolean logic, <code>&lt;&gt;</code> (not equals) functions as an <strong>Exclusive OR (XOR)</strong>:</p>
+<ul>
+<li>Both NULL? <code>(FALSE) &lt;&gt; (FALSE)</code> → <code>FALSE</code> (Rejected!)</li>
+<li>Both filled? <code>(TRUE) &lt;&gt; (TRUE)</code> → <code>FALSE</code> (Rejected!)</li>
+<li>Exactly one filled? <code>(TRUE) &lt;&gt; (FALSE)</code> → <code>TRUE</code> (Accepted!)</li>
+<li><strong>Why <code>ON DELETE RESTRICT</code> is required</strong>:</li>
+</ul>
+<p>MySQL 8.0.46 prohibits cascading referential actions (<code>ON DELETE CASCADE</code> or <code>SET NULL</code>) on foreign keys participating in a <code>CHECK</code> expression. Therefore, all ARC foreign keys must use <code>ON DELETE RESTRICT ON UPDATE RESTRICT</code>.</p>
+<h3 id="pattern-2-deliberate-denormalization-with-trigger-synchronization">Pattern 2: Deliberate Denormalization with Trigger Synchronization</h3>
+<ul>
+<li><strong>The Problem</strong>: Should match scores be calculated on the fly by counting <code>match_event</code> rows, or stored directly on <code>match</code>?</li>
+<li><strong>Our Design Decision</strong>:</li>
+<li><code>match</code> directly stores <code>home_score</code> and <code>away_score</code>.</li>
+<li><code>match_event</code> stores every individual goal/wicket.</li>
+<li><strong>Why</strong>: High-frequency dashboard queries, standings tables, and schedules require instant score access without running expensive joins on millions of game events.</li>
+<li><strong>How Integrity is Maintained</strong>:</li>
+</ul>
+<p>The database trigger <code>trg_update_score</code> listens for <code>AFTER INSERT ON match_event</code>. When a <code>'goal'</code> event is logged, the trigger increments <code>home_score</code> or <code>away_score</code> inside the same atomic database transaction.</p>
+<h3 id="pattern-3-dual-sport-progression-team-vs-individual">Pattern 3: Dual Sport Progression (Team vs Individual)</h3>
+<ul>
+<li>Our schema uses a single unified database for radically different sports:</li>
+<li>Team Sports follow: <code>team</code> → <code>registration</code> → <code>stage</code> → <code>match</code> → <code>match_event</code>.</li>
+<li>Athletics follow: <code>student</code> → <code>registration</code> → <code>stage</code> → <code>individual_result</code>.</li>
+<li>Both paths converge at <code>stage</code> and terminate at <code>award</code>.</li>
+</ul>
+<hr>
+<h2 id="6-database-triggers-what-they-are-deep-analysis">6. Database Triggers: What They Are &amp; Deep Analysis</h2>
+<h3 id="what-is-a-database-trigger">What is a Database Trigger?</h3>
+<p>A <strong>Trigger</strong> is a procedural database object that is bound to a table and executed <strong>automatically</strong> by the MySQL engine whenever a specific Data Manipulation Language (DML) event (<code>INSERT</code>, <code>UPDATE</code>, or <code>DELETE</code>) occurs on that table.</p>
+<p>Triggers have access to special virtual row variables:</p>
+<ul>
+<li><code>NEW</code>: Represents the incoming data being inserted or updated.</li>
+<li><code>OLD</code>: Represents the existing row data prior to update or deletion.</li>
+</ul>
+<h3 id="why-use-triggers-instead-of-expressnodejs-code">Why use Triggers instead of Express/Node.js Code?</h3>
+<div class="table-wrap"><table><tr><th>Aspect</th><th>Application Code (Node.js)</th><th>Database Trigger (MySQL)</th></tr><tr><td><strong>Bypassable?</strong></td><td>Yes (Direct SQL, Workbench, script imports bypass it)</td><td><strong>Never</strong> (Enforced inside the storage engine)</td></tr><tr><td><strong>Transaction Safety</strong></td><td>Requires manual <code>BEGIN...COMMIT</code> handling</td><td><strong>Automatic</strong> (Runs inside the invoking ACID transaction)</td></tr><tr><td><strong>Race Conditions</strong></td><td>Prone to read-then-write concurrency bugs</td><td><strong>Protected</strong> (Runs under InnoDB row/table locks)</td></tr><tr><td><strong>Error Handling</strong></td><td>Throws JavaScript errors</td><td>Uses standard <code>SIGNAL SQLSTATE '45000'</code></td></tr></table></div>
+<hr>
+<h3 id="the-6-active-triggers-in-campus-sports">The 6 Active Triggers in Campus Sports</h3>
+<h4 id="1-trg_check_eligibility_insert">1. <code>trg_check_eligibility_insert</code></h4>
+<ul>
+<li><strong>Timing &amp; Table</strong>: <code>BEFORE INSERT ON registration</code></li>
+<li><strong>Purpose</strong>: Prevents illegal student registrations based on demographic and academic criteria.</li>
+<li><strong>How It Works</strong>:</li>
+</ul>
+<ol>
+<li>Inspects <code>NEW.student_id</code>. If <code>NULL</code> (i.e. team registration), it bypasses student checks.</li>
+<li>Queries <code>eligibility_rule</code> and <code>student</code> joining on <code>event_id</code>.</li>
+<li>Computes the student's current age: <code>TIMESTAMPDIFF(YEAR, s.date_of_birth, CURRENT_DATE)</code>.</li>
+<li>Checks 3 criteria:</li>
+</ol>
+<ul>
+<li>Does <code>student.gender</code> match <code>eligibility_rule.gender</code>?</li>
+<li>Does <code>student.academic_year</code> fall between <code>min_year</code> and <code>max_year</code>?</li>
+<li>Does <code>student.age</code> fall between <code>min_age</code> and <code>max_age</code>?</li>
+</ul>
+<ol>
+<li>If any rule is violated, it invokes:</li>
+</ol>
+<p><code>SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Student ... does not satisfy event eligibility'</code>.</p>
+<h4 id="2-trg_check_eligibility_update">2. <code>trg_check_eligibility_update</code></h4>
+<ul>
+<li><strong>Timing &amp; Table</strong>: <code>BEFORE UPDATE ON registration</code></li>
+<li><strong>Purpose</strong>: Catches attempts to swap the <code>student_id</code> or <code>event_id</code> of an existing approved registration to an ineligible entrant.</li>
+</ul>
+<h4 id="3-trg_venue_clash_insert-temporal-conflict-resolution">3. <code>trg_venue_clash_insert</code> (Temporal Conflict Resolution)</h4>
+<ul>
+<li><strong>Timing &amp; Table</strong>: <code>BEFORE INSERT ON match</code></li>
+<li><strong>Purpose</strong>: Prevents double-booking any campus pitch, court, or hall.</li>
+<li><strong>The Mathematics of Time Interval Overlap</strong>:</li>
+</ul>
+<p>Two time intervals $[S_1, E_1]$ and $[S_2, E_2]$ overlap if and only if:</p>
+<p>$$S_1 &lt; E_2 \quad \text{AND} \quad E_1 &gt; S_2$$</p>
+<ul>
+<li><strong>How It Works</strong>:</li>
+</ul>
+<p>When scheduling <code>NEW</code> at <code>NEW.venue_id</code> from <code>NEW.starts_at</code> for <code>NEW.duration_minutes</code>:</p>
+<pre><code class="language-sql">  WHERE existing_match.venue_id = NEW.venue_id
+    AND existing_match.starts_at &lt; DATE_ADD(NEW.starts_at, INTERVAL NEW.duration_minutes MINUTE)
+    AND DATE_ADD(existing_match.starts_at, INTERVAL existing_match.duration_minutes MINUTE) &gt; NEW.starts_at</code></pre>
+<p>If any row matches, it rejects the insert: <code>'Venue is already occupied during this match time'</code>.</p>
+<h4 id="4-trg_venue_clash_update">4. <code>trg_venue_clash_update</code></h4>
+<ul>
+<li><strong>Timing &amp; Table</strong>: <code>BEFORE UPDATE ON match</code></li>
+<li><strong>Purpose</strong>: Checks for venue clashes when rescheduling a match or changing its venue/duration, while deliberately excluding itself (<code>existing_match.match_id &lt;&gt; OLD.match_id</code>).</li>
+<li><strong>Design Note</strong>: If an update only modifies <code>home_score</code> or <code>away_score</code>, the trigger skips the clash check entirely to avoid unnecessary locks.</li>
+</ul>
+<h4 id="5-trg_update_score">5. <code>trg_update_score</code></h4>
+<ul>
+<li><strong>Timing &amp; Table</strong>: <code>AFTER INSERT ON match_event</code></li>
+<li><strong>Purpose</strong>: Synchronizes match events with scorecards.</li>
+<li><strong>How It Works</strong>:</li>
+</ul>
+<ol>
+<li>Checks if <code>NEW.event_type = 'goal'</code>.</li>
+<li>Confirms that <code>NEW.team_id</code> is actually one of the teams playing in <code>NEW.match_id</code> (either <code>home_team_id</code> or <code>away_team_id</code>). If not, it signals an error.</li>
+<li>Executes an internal <code>UPDATE match SET home_score = home_score + 1</code> (or <code>away_score</code>).</li>
+</ol>
+<h4 id="6-trg_lock_final_match-historical-immutability">6. <code>trg_lock_final_match</code> (Historical Immutability)</h4>
+<ul>
+<li><strong>Timing &amp; Table</strong>: <code>BEFORE UPDATE ON match</code></li>
+<li><strong>Purpose</strong>: Enforces sports integrity by permanently locking finished matches.</li>
+<li><strong>How It Works</strong>:</li>
+</ul>
+<p>If <code>OLD.status = 'completed'</code>, any attempt to tamper with scores, teams, venues, stages, or dates raises:</p>
+<p><code>SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Completed matches cannot be edited'</code>.</p>
+<p>Once a game is final, history cannot be rewritten without administrative audit intervention.</p>
+<hr>
+<h2 id="7-the-standings-engine-why-we-use-views-instead-of-stored-tables">7. The Standings Engine: Why We Use Views Instead of Stored Tables</h2>
+<p>In our database, there is <strong>no table called <code>points_table</code></strong>. Instead, standings are computed by a dynamic database view: <code>v_points_table</code>.</p>
+<h3 id="what-is-a-view">What is a View?</h3>
+<p>A <strong>View</strong> is a saved, named <code>SELECT</code> query stored in the database dictionary. It acts as a virtual table. When you run <code>SELECT * FROM v_points_table</code>, MySQL executes the underlying query against the base tables.</p>
+<h3 id="why-standings-must-be-a-view">Why Standings Must Be a View:</h3>
+<ol>
+<li><strong>Zero Redundancy / No Update Anomalies</strong>:</li>
+</ol>
+<p>If team points were stored in a physical table, every score update would require updating <code>match</code>, <code>match_event</code>, and <code>points_table</code>. If a transaction failed midway, the points table would be out of sync with actual scores.</p>
+<ol>
+<li><strong>Reproducible Truth</strong>:</li>
+</ol>
+<p>Standings are purely derived data. If you recalculate points tomorrow or fix a disputed score, the standings table is instantly 100% accurate.</p>
+<h3 id="how-v_points_table-computes-points">How <code>v_points_table</code> Computes Points:</h3>
+<p>Under the hood, <code>v_points_table</code> aggregates match records:</p>
+<ul>
+<li><strong>Matches Played ($P$)</strong>: Count of completed matches where the team was either home or away.</li>
+<li><strong>Wins ($W$)</strong>: Count of matches where team was home and <code>home_score &gt; away_score</code>, plus away wins.</li>
+<li><strong>Draws ($D$)</strong>: Count of completed matches where <code>home_score = away_score</code>.</li>
+<li><strong>Losses ($L$)</strong>: Count of matches where the team scored fewer points.</li>
+<li><strong>Goal Difference ($GD$)</strong>:</li>
+</ul>
+<p>$$\text{Signed Goals For} - \text{Signed Goals Against}$$</p>
+<p><em>(Note: Cast to signed integers to prevent MySQL unsigned subtraction underflow!)</em></p>
+<ul>
+<li><strong>Total Points</strong>:</li>
+</ul>
+<p>$$\text{Points} = (W \times 3) + (D \times 1) + (L \times 0)$$</p>
+<ul>
+<li><strong>Position Ranking</strong>:</li>
+</ul>
+<p>Computed using the MySQL 8.0 window function:</p>
+<pre><code class="language-sql">  DENSE_RANK() OVER (
+      PARTITION BY m.stage_id 
+      ORDER BY points DESC, goal_difference DESC
+  ) AS points_position</code></pre>
+<hr>
+<h2 id="8-viva-oral-defense-quick-reference">8. Viva &amp; Oral Defense Quick Reference</h2>
+<div class="table-wrap"><table><tr><th>Typical Examiner Question</th><th>Concise, Confident Answer</th></tr><tr><td><strong>"What normal form is your database in?"</strong></td><td>"The schema is in Boyce-Codd Normal Form (BCNF). Every relation is in 1NF (atomic attributes), 2NF (no partial functional dependencies on composite keys), and 3NF (no transitive dependencies). In all non-trivial functional dependencies $X \to Y$, $X$ is a superkey. The only deliberate denormalization is storing aggregate match scores on <code>match</code>, which is strictly synchronized by our <code>trg_update_score</code> trigger."</td></tr><tr><td><strong>"Why do you have <code>match_id</code> and <code>individual_result_id</code> both in <code>official</code>?"</strong></td><td>"Officials can referee team matches or judge athletics heats. Since SQL does not permit a foreign key to point to multiple tables dynamically, we used the Relational Arc Pattern with two nullable foreign keys and a CHECK constraint: <code>(match_id IS NOT NULL) &lt;&gt; (individual_result_id IS NOT NULL)</code> to guarantee an official is assigned to exactly one target."</td></tr><tr><td><strong>"What happens if someone deletes a department?"</strong></td><td>"MySQL aborts the deletion with an error (<code>ON DELETE RESTRICT</code>). A department can only be deleted if it has no enrolled students and no competing teams."</td></tr><tr><td><strong>"How do you prevent scheduling two matches on the same ground at the same time?"</strong></td><td>"We enforce temporal non-overlap at the database tier using <code>trg_venue_clash_insert</code> and <code>trg_venue_clash_update</code>. The trigger computes $[starts\_at, starts\_at + duration]$ and signals error <code>45000</code> if another fixture occupies that venue during the interval."</td></tr><tr><td><strong>"Why is <code>match</code> wrapped in backticks in your SQL?"</strong></td><td>"<code>MATCH</code> is a reserved keyword in MySQL 8.0 (used for full-text search <code>MATCH...AGAINST</code>). To maintain singular snake_case naming standards without parser errors, we escape it as `<code> </code>match<code> </code>`."</td></tr><tr><td><strong>"Where are standings stored?"</strong></td><td>"Standings are not stored in any table. They are computed dynamically by the database view <code>v_points_table</code> using window functions like <code>DENSE_RANK()</code>. This eliminates update anomalies and guarantees that standings always match raw score history."</td></tr><tr><td><strong>"What storage engine did you use and why?"</strong></td><td>"We use InnoDB with <code>utf8mb4_0900_ai_ci</code>. InnoDB is essential because it supports ACID transactions, row-level locking, foreign key referential integrity constraints, and CHECK constraint enforcement."</td></tr></table></div>
+<hr>
+<p><em>Created for the Campus Sports Tournament DBMS Project. Keep this handout handy for oral viva reviews and code defense.</em></p>
+</body>
+</html>
